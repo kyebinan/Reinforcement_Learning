@@ -1,9 +1,8 @@
 import torch
-
 import gym_super_mario_bros
-from gym_super_mario_bros.actions import RIGHT_ONLY, SIMPLE_MOVEMENT
+from gym_super_mario_bros.actions import RIGHT_ONLY
 
-from agent import Agent
+from agent import RainbowAgent
 
 from nes_py.wrappers import JoypadSpace
 from wrappers import apply_wrappers
