@@ -1,8 +1,7 @@
 import torch
 from torch import nn
-import torch.nn.functional as F
 import numpy as np
-from collections import deque
+from collections import deque, namedtuple
 
 class DeepConvQNetwork(nn.module):
     """
@@ -165,6 +164,16 @@ class DuelingDeepConvQNetwork(nn.Module):
         return self.conv(torch.autograd.Variable(torch.zeros(1, *self.input_dim))).view(1, -1).size(1)
 
 
+
+
+"""namedtuple is used to create a special type of tuple object. Namedtuples
+always have a specific name (like a class) and specific fields.
+In this case I will create a namedtuple 'Experience',
+with fields: state, action, reward,  next_state, done.
+Usage: for some given variables s, a, r, s, d you can write for example
+exp = Experience(s, a, r, s, d). Then you can access the reward
+field by  typing exp.reward"""
+Experience = namedtuple('Experience',['state', 'action', 'reward', 'next_state', 'done'])
 
 class ExperienceReplayBuffer(object):
     """
