@@ -15,9 +15,9 @@ TRAIN="TRAIN"
 TEST="TEST"
 
 class Agent():
-    def __init__(self, input_dims, n_actions, seed, Z, max_mem_size, agent_mode=SIMPLE, network_mode=SIMPLE, 
-                test_mode=False, batch_size=64, n_epochs=1, update_every=5, lr=0.0005, fc1_dims=64, fc2_dims=64,
-                gamma=0.99, eps_min=0.05,eps_max=0.95, tau=1e-3):
+    def __init__(self, input_dims, n_actions, seed, Z, max_mem_size, agent_mode=SIMPLE, 
+                network_mode=SIMPLE, test_mode=False, batch_size=64, n_epochs=1, 
+                update_every=5, lr=0.0005, gamma=0.99, eps_min=0.05,eps_max=0.95, tau=1e-3):
         
         self.input_dims = input_dims
         self.n_actions =  n_actions
@@ -31,6 +31,7 @@ class Agent():
         self.n_epochs = n_epochs
         self.update_every = update_every
         
+        self.lr = lr
         self.gamma = gamma
         self.epsilon = eps_max
         self.eps_min = eps_min
@@ -42,6 +43,7 @@ class Agent():
         self.memory = ExperienceReplayBuffer(max_mem_size)
         self.update_cntr = 0
         self.episode = 1
+        
 
         # For naming purpose
         agent_ = '{}-'.format(self.agent_mode) if self.agent_mode!=SIMPLE else ''
