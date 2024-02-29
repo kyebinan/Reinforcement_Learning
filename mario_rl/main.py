@@ -59,7 +59,8 @@ for i in EPISODES:
         next_state, reward, terminated, truncated, _= env.step(action)
 
         done = truncated or terminated
-        my_agent.step(Experience(state, action, reward, next_state, done))
+        #observation = Experience(state, action, reward, next_state, done)
+        my_agent.step(state, action, reward, next_state, done)
 
         # Update episode reward
         total_episode_reward += reward

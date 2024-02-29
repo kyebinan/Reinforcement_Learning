@@ -1,9 +1,9 @@
 import torch
-from torch import nn
+import torch.nn as nn
 import numpy as np
 from collections import deque, namedtuple
 
-class DeepConvQNetwork(nn.module):
+class DeepConvQNetwork(nn.Module):
     """
     Deep Convolutional Q-Network for reinforcement learning.
 
@@ -29,7 +29,6 @@ class DeepConvQNetwork(nn.module):
         super(DeepConvQNetwork, self).__init__()
         self.input_dim = input_dim
         self.output_dim = output_dim
-        self.fc_input_dim = self.feature_size()
 
         self.conv = nn.Sequential(
             nn.Conv2d(input_dim[0], 32, kernel_size=8, stride=4),
@@ -40,10 +39,14 @@ class DeepConvQNetwork(nn.module):
             nn.ReLU()
         )
 
+        self.fc_input_dim = self.feature_size()
+
         self.network = nn.Sequential(
-            nn.Linear(self.fc_input_dim, 128),
+            self.conv,
+            nn.Flatten(),
+            nn.Linear(self.fc_input_dim, 512),
             nn.ReLU(),
-            nn.Linear(128, self.output_dim)
+            nn.Linear(512, self.output_dim)
         )
         
         self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -59,9 +62,11 @@ class DeepConvQNetwork(nn.module):
         Returns:
             torch.Tensor: Output Q-values predicted by the neural network for different actions.
         """
-        features = self.conv(state)
-        features = features.view(features.size(0), -1)
-        qvals = self.network(features)
+        #features = self.conv(state)
+        #features = features.view(features.size(0), -1)
+        #qvals = self.network(features)
+        state = state.to(self.device)
+        qvals = self.network(state)
         
         return qvals
     
@@ -107,7 +112,6 @@ class DuelingDeepConvQNetwork(nn.Module):
         super(DuelingDeepConvQNetwork, self).__init__()
         self.input_dim = input_dim
         self.output_dim = output_dim
-        self.fc_input_dim = self.feature_size()
 
         self.conv = nn.Sequential(
             nn.Conv2d(input_dim[0], 32, kernel_size=8, stride=4),
@@ -117,6 +121,8 @@ class DuelingDeepConvQNetwork(nn.Module):
             nn.Conv2d(64, 64, kernel_size=3, stride=1),
             nn.ReLU()
         )
+
+        self.fc_input_dim = self.feature_size()
 
         # Value Stream.
         self.value_stream = nn.Sequential(

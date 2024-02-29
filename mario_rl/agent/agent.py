@@ -4,7 +4,7 @@ import torch as T
 import torch.nn as nn
 import torch.optim as optim
 import os
-from utils import DeepConvQNetwork, DuelingDeepConvQNetwork, ExperienceReplayBuffer
+from agent.utils import *
 
 # NN Architectures
 SIMPLE="SIMPLE"
@@ -95,7 +95,7 @@ class Agent():
             None
         """
         # Save experience in replay memory
-        exp = ExperienceReplayBuffer(state, action, reward, next_state, done)
+        exp = Experience(state, action, reward, next_state, done)
         self.memory.append(exp)
         
         # Learn every update_cntr time steps.
@@ -119,12 +119,14 @@ class Agent():
             int: Chosen action based on the epsilon-greedy strategy.
         """
         if np.random.random() > self.epsilon:
-            state = observation
-            self.Q_eval.eval()
-            with T.no_grad():
-                Q = self.Q_eval.forward(T.from_numpy(state).to(self.Q_eval.device))
-            self.Q_eval.train()
-            action = T.argmax(Q).item()
+            observation = torch.tensor(np.array(observation), dtype=torch.float32).unsqueeze(0).to(self.Q_eval.device)
+            action = self.Q_eval(observation).argmax().item()
+            # observation = np.array(observation, dtype=np.uint8)
+            # self.Q_eval.eval()
+            # with T.no_grad():
+            #     Q = self.Q_eval.forward(T.from_numpy(observation).to(self.Q_eval.device))
+            # self.Q_eval.train()
+            # action = T.argmax(Q).item()
         else:
             action = np.random.choice(np.arange(self.n_actions))
             
@@ -172,27 +174,28 @@ class Agent():
         rewards = T.tensor(rewards, dtype=T.float32)
         dones = T.tensor(dones, dtype=T.float32)
         
-        if self.agent_mode :
+        if self.agent_mode:
             # Double DQN Approach
             self.Q_eval.eval()
             with T.no_grad():
-                # Q_Eval over next states to fetch max action arguement to pass to q_next
                 q_pred = self.Q_eval.forward(next_states).to(self.Q_eval.device)
                 max_actions = T.argmax(q_pred, dim=1).long().unsqueeze(1)
-                # Q_Target over next states from actions will be taken based on q_pred's max_actions
                 q_next = self.Q_next.forward(next_states).to(self.Q_eval.device)
             self.Q_eval.train()
-            q_target = rewards + self.gamma*q_next.gather(1, max_actions)*(1.0 - dones)
+            q_target = rewards.to(self.Q_eval.device) + self.gamma * q_next.gather(1, max_actions).to(self.Q_eval.device) * (1.0 - dones.to(self.Q_eval.device))
 
         else:
             # DQN Approach
             q_target_next = self.Q_next.forward(next_states).to(self.Q_eval.device).detach().max(dim=1)[0].unsqueeze(1)
-            q_target = rewards + (self.gamma* q_target_next * (1 - dones))
+            q_target = rewards.to(self.Q_eval.device) + (self.gamma * q_target_next * (1 - dones.to(self.Q_eval.device)))
 
         # Training
-        for epoch in range(self.n_epochs):
-            q_eval = self.Q_eval.forward(states).to(self.Q_eval.device).gather(1, actions)
-            loss = self.Q_eval.loss(q_eval, q_target).to(self.Q_eval.device)
+        for _ in range(self.n_epochs):
+            q_eval = self.Q_eval.forward(states)
+            actions_device = actions.to(self.Q_eval.device)  
+            q_eval = q_eval.gather(1, actions_device)
+            q_target_device = q_target.to(self.Q_eval.device)  
+            loss = self.Q_eval.loss(q_eval, q_target_device)
             self.Q_eval.optimizer.zero_grad()
             loss.backward()
             nn.utils.clip_grad_norm_(self.Q_eval.parameters(), max_norm=1.0)
