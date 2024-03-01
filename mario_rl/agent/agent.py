@@ -1,10 +1,13 @@
 import random
 import numpy as np
 import torch as T
-import torch.nn as nn
+import torch.nn.functional as F
 import torch.optim as optim
 import os
-from agent.utils import *
+
+from agent.network import DeepConvQNetwork, DuelingDeepConvQNetwork
+from agent.experience import ExperienceReplayBuffer
+from agent.utils import Experience
 
 # NN Architectures
 SIMPLE="SIMPLE"
@@ -15,21 +18,30 @@ TRAIN="TRAIN"
 TEST="TEST"
 
 class Agent():
-    def __init__(self, input_dims, n_actions, seed, Z, max_mem_size, agent_mode=SIMPLE, 
-                network_mode=SIMPLE, test_mode=False, batch_size=64, n_epochs=1, 
-                update_every=5, lr=0.0005, gamma=0.99, eps_min=0.05,eps_max=0.95, tau=1e-3):
+    def __init__(self, 
+                 input_dims, 
+                 n_actions,
+                 max_mem_size, 
+                 Z,
+                 agent_mode=SIMPLE, 
+                 network_mode=SIMPLE, 
+                 batch_size=64, 
+                 n_epochs=5, 
+                 lr=0.001, 
+                 gamma=0.95, 
+                 eps_min=0.05, 
+                 eps_max=0.95):
         
         self.input_dims = input_dims
         self.n_actions =  n_actions
-        self.seed = random.seed(seed)
+        self.seed = random.seed(42)
         
         self.agent_mode=agent_mode
-        self.network_mode=network_mode
-        self.test_mode=test_mode
+        self.network_mode=network_mode 
         
         self.batch_size = batch_size
         self.n_epochs = n_epochs
-        self.update_every = update_every
+        self.update_every = max_mem_size//batch_size # No real explanation, just a good practice
         
         self.lr = lr
         self.gamma = gamma
@@ -38,7 +50,6 @@ class Agent():
         self.eps_max = eps_max
         self.mem_size = max_mem_size
         self.Z = Z
-        self.tau = tau
 
         self.memory = ExperienceReplayBuffer(max_mem_size)
         self.update_cntr = 0
@@ -53,9 +64,13 @@ class Agent():
         if network_mode==DUELING:
             self.Q_eval = DuelingDeepConvQNetwork(input_dim=self.input_dims, output_dim=self.n_actions)
             self.Q_next = DuelingDeepConvQNetwork(input_dim=self.input_dims, output_dim=self.n_actions)
-        else:
+        elif network_mode==SIMPLE:
             self.Q_eval = DeepConvQNetwork(input_dim=self.input_dims, output_dim=self.n_actions)
             self.Q_next = DeepConvQNetwork(input_dim=self.input_dims, output_dim=self.n_actions)
+        else:
+            raise ValueError("the network_mode must be SIMPLE or DUELING.")
+
+        self.optimizer = optim.Adam(self.Q_eval.parameters(), lr=lr)
 
 
     def save_model(self):
@@ -119,7 +134,7 @@ class Agent():
             int: Chosen action based on the epsilon-greedy strategy.
         """
         if np.random.random() > self.epsilon:
-            observation = torch.tensor(np.array(observation), dtype=torch.float32).unsqueeze(0).to(self.Q_eval.device)
+            observation = T.tensor(np.array(observation), dtype=T.float32).unsqueeze(0).to(self.Q_eval.device)
             action = self.Q_eval(observation).argmax().item()
             # observation = np.array(observation, dtype=np.uint8)
             # self.Q_eval.eval()
@@ -174,7 +189,7 @@ class Agent():
         rewards = T.tensor(rewards, dtype=T.float32)
         dones = T.tensor(dones, dtype=T.float32)
         
-        if self.agent_mode:
+        if self.agent_mode == DOUBLE:
             # Double DQN Approach
             self.Q_eval.eval()
             with T.no_grad():
@@ -184,22 +199,24 @@ class Agent():
             self.Q_eval.train()
             q_target = rewards.to(self.Q_eval.device) + self.gamma * q_next.gather(1, max_actions).to(self.Q_eval.device) * (1.0 - dones.to(self.Q_eval.device))
 
-        else:
+        elif self.agent_mode == SIMPLE:
             # DQN Approach
             q_target_next = self.Q_next.forward(next_states).to(self.Q_eval.device).detach().max(dim=1)[0].unsqueeze(1)
             q_target = rewards.to(self.Q_eval.device) + (self.gamma * q_target_next * (1 - dones.to(self.Q_eval.device)))
 
+        else:
+            raise ValueError("the agent_mode must be SIMPLE or DOUBLE.")
+
         # Training
         for _ in range(self.n_epochs):
             q_eval = self.Q_eval.forward(states)
-            actions_device = actions.to(self.Q_eval.device)  
-            q_eval = q_eval.gather(1, actions_device)
-            q_target_device = q_target.to(self.Q_eval.device)  
-            loss = self.Q_eval.loss(q_eval, q_target_device)
-            self.Q_eval.optimizer.zero_grad()
+            actions = actions.to(self.Q_eval.device)  
+            q_eval = q_eval.gather(1, actions)
+            q_target = q_target.to(self.Q_eval.device)  
+            loss = F.mse_loss(q_eval, q_target)
+            self.optimizer.zero_grad()
             loss.backward()
-            nn.utils.clip_grad_norm_(self.Q_eval.parameters(), max_norm=1.0)
-            self.Q_eval.optimizer.step()
+            self.optimizer.step()
 
         # Replace Target Network
         self.replace_target_network()
