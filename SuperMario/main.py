@@ -9,8 +9,8 @@ from agent.agent import Agent, SIMPLE, DOUBLE, DUELING, TRAIN, TEST
 from utils import running_average
 
 
-ENV_NAME = 'SuperMarioBros-1-1-v0'
-DISPLAY = True 
+ENV_NAME = 'SuperMarioBros-1-1-v3'
+DISPLAY = False
 
 env = gym_super_mario_bros.make(ENV_NAME, render_mode='human' if DISPLAY else 'rgb', 
                                 apply_api_compatibility=True)
@@ -66,6 +66,7 @@ for i in EPISODES:
     total_episode_reward = 0.
     t = 0
     while not done:
+        #env.render()
         action = my_agent.choose_action(state)
         next_state, reward, terminated, truncated, _= env.step(action)
         done = truncated or terminated
