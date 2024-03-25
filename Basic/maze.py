@@ -1,11 +1,3 @@
-
-
-# BINAN KOUASSI YOHAN EMMANUEL => 20010402-T456
-# SEBASTIAN WENK => 20000825-T431
-
-
-
-
 import numpy as np
 import matplotlib.pyplot as plt
 import time
