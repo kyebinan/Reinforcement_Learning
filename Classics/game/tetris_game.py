@@ -79,34 +79,23 @@ class TetrisGame(Game):
 
         return self.get_state(), self.score, self.done
 
-    def render(self):
-        pygame.init()
+    def render(self, screen):
         cell_size = 40
-        screen = pygame.display.set_mode((self.width * cell_size, self.height * cell_size))
-        pygame.display.set_caption("Tetris")
+        screen.fill((0, 0, 0))
 
-        while not self.done:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    self.done = True
-            screen.fill((0, 0, 0))
+        # Draw the board
+        for i in range(self.height):
+            for j in range(self.width):
+                if self.board[i][j] == 1:
+                    pygame.draw.rect(screen, (255, 255, 255), [j * cell_size, i * cell_size, cell_size, cell_size])
 
-            # Draw the board
-            for i in range(self.height):
-                for j in range(self.width):
-                    if self.board[i][j] == 1:
-                        pygame.draw.rect(screen, (255, 255, 255), [j * cell_size, i * cell_size, cell_size, cell_size])
+        # Draw the current piece
+        for i, row in enumerate(self.current_piece):
+            for j, cell in enumerate(row):
+                if cell == 1:
+                    pygame.draw.rect(screen, (255, 165, 0), [(self.piece_position[0] + j) * cell_size, (self.piece_position[1] + i) * cell_size, cell_size, cell_size])
 
-            # Draw the current piece
-            for i, row in enumerate(self.current_piece):
-                for j, cell in enumerate(row):
-                    if cell == 1:
-                        pygame.draw.rect(screen, (255, 165, 0), [(self.piece_position[0] + j) * cell_size, (self.piece_position[1] + i) * cell_size, cell_size, cell_size])
-
-            pygame.display.flip()
-            pygame.time.delay(500)
-
-        pygame.quit()
+        pygame.display.flip()
 
     def get_state(self):
         # Implement state representation (omitted for brevity)
@@ -145,32 +134,53 @@ class TetrisGame(Game):
 def main():
     pygame.init()
     game = TetrisGame(10, 20)
-    screen = pygame.display.set_mode((game.width * 20, game.height * 20))
+    screen = pygame.display.set_mode((game.width * 40, game.height * 40))
+    pygame.display.set_caption("Tetris")
     clock = pygame.time.Clock()
-    running = True
 
+    fall_time = 0
+    fall_speed = 1000  # Milliseconds between each automatic step down
+
+    running = True
     while running:
-        if game.game_over:
-            game.reset()
+        # The time passed since the last tick, in milliseconds
+        delta_time = clock.tick(60)  # Run at max 60 frames per second
+        
+        fall_time += delta_time
+
+        if fall_time >= fall_speed:
+            fall_time = 0
+            game.step(3)  # Drop piece over time
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT:
-                    game.step(0)  # Move left
-                if event.key == pygame.K_RIGHT:
-                    game.step(1)  # Move right
-                if event.key == pygame.K_UP:
-                    game.step(2)  # Rotate
-                if event.key == pygame.K_DOWN:
-                    game.step(3)  # Drop
+                    game.step(0)
+                elif event.key == pygame.K_RIGHT:
+                    game.step(1)
+                elif event.key == pygame.K_UP:
+                    game.step(2)
+                elif event.key == pygame.K_DOWN:
+                    # For an immediate drop, increase fall_speed temporarily or call game.step(3) multiple times.
+                    game.step(3)
 
-        game.step(3)  # Automatically drop the piece over time
         screen.fill((0, 0, 0))
-        game.render()
+        game.render(screen)
         pygame.display.flip()
-        clock.tick(2)  # Adjust speed as needed
+
+        if game.game_over:
+            print("Game Over. Press any key to restart.")
+            waiting_for_input = True
+            while waiting_for_input:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        running = False
+                        waiting_for_input = False
+                    if event.type == pygame.KEYDOWN:
+                        game.reset()
+                        waiting_for_input = False
 
     pygame.quit()
 

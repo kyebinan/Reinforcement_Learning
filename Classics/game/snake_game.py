@@ -8,6 +8,9 @@ class SnakeGame(Game):
         super().__init__()
         self.width = width
         self.height = height
+        self.cell_size = 20
+        self.screen = pygame.display.set_mode((self.width * self.cell_size, self.height * self.cell_size))
+        pygame.display.set_caption('Snake Game')
         self.directions = ['UP', 'DOWN', 'LEFT', 'RIGHT']
         self.delta = {'UP': (0, -1), 'DOWN': (0, 1), 'LEFT': (-1, 0), 'RIGHT': (1, 0)}
         self.reset()
@@ -67,54 +70,29 @@ class SnakeGame(Game):
         return (self.snake, self.food, self.direction)
 
     def render(self):
-        pygame.init()
-        cell_size = 20  # Size of each square
-        screen = pygame.display.set_mode((self.width * cell_size, self.height * cell_size))
-        pygame.display.set_caption('Snake Game')
-
-        # Colors
-        black = (0, 0, 0)
-        white = (255, 255, 255)
-        red = (213, 50, 80)
-
-        # Game loop control flag
-        running = True
-        while running:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    running = False
-
-            screen.fill(black)
-
-            # Draw the snake
-            for block in self.snake:
-                rect = pygame.Rect(block[0] * cell_size, block[1] * cell_size, cell_size, cell_size)
-                pygame.draw.rect(screen, white, rect)
-
-            # Draw the food
-            food_rect = pygame.Rect(self.food[0] * cell_size, self.food[1] * cell_size, cell_size, cell_size)
-            pygame.draw.rect(screen, red, food_rect)
-
-            pygame.display.flip()
-            pygame.time.wait(100)
-
-        pygame.quit()
+        self.screen.fill((0, 0, 0))
+        for block in self.snake:
+            rect = pygame.Rect(block[0] * self.cell_size, block[1] * self.cell_size, self.cell_size, self.cell_size)
+            pygame.draw.rect(self.screen, (255, 255, 255), rect)
+        food_rect = pygame.Rect(self.food[0] * self.cell_size, self.food[1] * self.cell_size, self.cell_size, self.cell_size)
+        pygame.draw.rect(self.screen, (213, 50, 80), food_rect)
+        pygame.display.flip()
 
 
 
 def main():
     game = SnakeGame(40, 30)
-
-    # Game loop
+    clock = pygame.time.Clock()
     while not game.done:
-        # For simplicity, actions are random. Replace with your RL agent's actions.
-        action = 0 #random.randint(0, 3)  # Random action: 0=UP, 1=DOWN, 2=LEFT, 3=RIGHT
-        state, reward, done = game.step(action)
-        game.render()  # Render the game state
-        
-        if done:
+        action = random.randint(0, 3)
+        game.step(action)
+        game.render()
+        clock.tick(10)  # Control the speed of the game
+
+        if game.done:
             print("Game Over")
-            game.reset()  # Reset the game to start over
+            #game.reset()
+
 
 if __name__ == "__main__":
     main()
