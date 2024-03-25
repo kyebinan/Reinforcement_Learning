@@ -1,4 +1,4 @@
-import numpy as np
+import pygame
 import random
 from game import Game 
 
@@ -67,6 +67,54 @@ class SnakeGame(Game):
         return (self.snake, self.food, self.direction)
 
     def render(self):
-        # Implement rendering logic
-        # This method would use something like Pygame to draw the snake, food, and score.
-        pass
+        pygame.init()
+        cell_size = 20  # Size of each square
+        screen = pygame.display.set_mode((self.width * cell_size, self.height * cell_size))
+        pygame.display.set_caption('Snake Game')
+
+        # Colors
+        black = (0, 0, 0)
+        white = (255, 255, 255)
+        red = (213, 50, 80)
+
+        # Game loop control flag
+        running = True
+        while running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+
+            screen.fill(black)
+
+            # Draw the snake
+            for block in self.snake:
+                rect = pygame.Rect(block[0] * cell_size, block[1] * cell_size, cell_size, cell_size)
+                pygame.draw.rect(screen, white, rect)
+
+            # Draw the food
+            food_rect = pygame.Rect(self.food[0] * cell_size, self.food[1] * cell_size, cell_size, cell_size)
+            pygame.draw.rect(screen, red, food_rect)
+
+            pygame.display.flip()
+            pygame.time.wait(100)
+
+        pygame.quit()
+
+
+
+def main():
+    game = SnakeGame(40, 30)
+
+    # Game loop
+    while not game.done:
+        # For simplicity, actions are random. Replace with your RL agent's actions.
+        action = 0 #random.randint(0, 3)  # Random action: 0=UP, 1=DOWN, 2=LEFT, 3=RIGHT
+        state, reward, done = game.step(action)
+        game.render()  # Render the game state
+        
+        if done:
+            print("Game Over")
+            game.reset()  # Reset the game to start over
+
+if __name__ == "__main__":
+    main()
