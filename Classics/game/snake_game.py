@@ -1,5 +1,6 @@
 import pygame
 import random
+import numpy as np
 from game import Game 
 
 
@@ -63,11 +64,21 @@ class SnakeGame(Game):
         return self.get_state(), reward, self.done
 
     def get_state(self):
-        # Implement state representation
-        # For simplicity, we're not implementing a full state representation here.
-        # A typical state could include the direction of the snake, distance to food,
-        # and information about the immediate surroundings.
-        return (self.snake, self.food, self.direction)
+        # Create an empty grid initialized with 0s
+        grid = np.zeros((self.height, self.width), dtype=int)
+        
+        # Place the food in the grid
+        food_x, food_y = self.food
+        grid[food_y][food_x] = 1
+        
+        # Place the snake in the grid
+        for i, (x, y) in enumerate(self.snake):
+            if i == 0:  # Head of the snake
+                grid[y][x] = 2
+            else:  # Body of the snake
+                grid[y][x] = 3
+        
+        return grid
 
     def render(self):
         self.screen.fill((0, 0, 0))
