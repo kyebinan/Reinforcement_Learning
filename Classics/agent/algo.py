@@ -1,52 +1,62 @@
 import numpy as np
 import random
 
-
-
 class AgentAbstract:
     def __init__(self, action_space_size):
-        """
-        Initializes the RandomAgent with the available action space.
-        :param action_space: A list of possible actions the agent can take.
-        """
-        self.action_space = action_space_size
+        self.action_space_size = action_space_size
 
     def choose_action(self, state):
-        pass
+        """
+        To be implemented by subclasses.
+        """
+        raise NotImplementedError
 
     def update_q_table(self, state, action, reward, next_state):
-        pass
+        """
+        To be implemented by subclasses.
+        """
+        raise NotImplementedError
 
     def get_state(self, game):
-        pass
+        """
+        To be implemented by subclasses.
+        """
+        raise NotImplementedError
 
-
-class RandomAgent:
+class RandomAgent(AgentAbstract):
     def __init__(self, action_space_size):
-        """
-        Initializes the RandomAgent with the available action space.
-        :param action_space: A list of possible actions the agent can take.
-        """
-        self.action_space = action_space_size
+        super().__init__(action_space_size)
 
     def choose_action(self, state):
         """
         Selects a random action from the action space.
         :return: The selected action.
         """
-        return random.choice(self.action_space)
+        return random.randint(0, self.action_space_size - 1)
 
-class QLearningAgent:
+    def update_q_table(self, state, action, reward, next_state):
+        """
+        Not applicable for RandomAgent but implemented to fulfill the interface.
+        """
+        pass
+
+    def get_state(self, game):
+        """
+        Not applicable for RandomAgent but implemented to fulfill the interface.
+        """
+        pass
+
+class QLearningAgent(AgentAbstract):
     def __init__(self, state_space_size, action_space_size, alpha=0.1, gamma=0.9, epsilon=0.1):
+        super().__init__(action_space_size)
         self.q_table = np.zeros((state_space_size, action_space_size))
         self.alpha = alpha
         self.gamma = gamma
         self.epsilon = epsilon
-        self.action_space_size = action_space_size
 
     def choose_action(self, state):
         if np.random.uniform(0, 1) < self.epsilon:
-            action = np.random.choice(self.action_space_size)
+            action = random.randint(0, self.action_space_size - 1)
         else:
             action = np.argmax(self.q_table[state])
         return action
@@ -55,4 +65,7 @@ class QLearningAgent:
         self.q_table[state, action] += self.alpha * (reward + self.gamma * np.max(self.q_table[next_state]) - self.q_table[state, action])
 
     def get_state(self, game):
+        """
+        This method would need specific implementation based on the game's state representation.
+        """
         pass
