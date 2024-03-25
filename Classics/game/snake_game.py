@@ -17,7 +17,7 @@ class SnakeGame(Game):
         self.reset()
 
     def reset(self):
-        self.snake = [(self.width // 2, self.height // 2)]
+        self.snake = [(self.width // 2, self.height // 2), (self.width // 2, 1 + self.height // 2)]
         self.direction = 'UP'
         self.score = 0
         self.done = False
@@ -33,19 +33,26 @@ class SnakeGame(Game):
 
     def step(self, action):
         self.frame_iteration += 1
-        # Convert action to direction
-        self.direction = self.directions[action]
+        
+        # Get the next direction based on the action
+        next_direction = self.directions[action]
+        
+        # Prevent the snake from reversing direction
+        if (self.direction == 'UP' and next_direction != 'DOWN') or \
+        (self.direction == 'DOWN' and next_direction != 'UP') or \
+        (self.direction == 'LEFT' and next_direction != 'RIGHT') or \
+        (self.direction == 'RIGHT' and next_direction != 'LEFT'):
+            self.direction = next_direction
 
-        # Move the snake
+        # Calculate new head position
         head_x, head_y = self.snake[0]
         delta_x, delta_y = self.delta[self.direction]
         new_head = (head_x + delta_x, head_y + delta_y)
 
         # Check for game over conditions
         if (new_head in self.snake or
-                new_head[0] < 0 or new_head[0] >= self.width or
-                new_head[1] < 0 or new_head[1] >= self.height or
-                self.frame_iteration > 100*len(self.snake)):
+            new_head[0] < 0 or new_head[0] >= self.width or
+            new_head[1] < 0 or new_head[1] >= self.height):
             self.done = True
             reward = -10  # Penalty for losing
             return self.get_state(), reward, self.done
@@ -55,11 +62,14 @@ class SnakeGame(Game):
             self.score += 1
             self.food = self._spawn_food()
             reward = 10  # Reward for eating food
+            # Do not remove the tail, effectively growing the snake
         else:
-            self.snake.pop()  # Remove the tail
+            # Move the snake by removing the tail
+            self.snake.pop()
             reward = 0
 
-        self.snake.insert(0, new_head)  # Add new head
+        # Insert the new head to move the snake
+        self.snake.insert(0, new_head)
 
         return self.get_state(), reward, self.done
 
@@ -96,7 +106,7 @@ def main():
     clock = pygame.time.Clock()
     while not game.done:
         action = random.randint(0, 3)
-        game.step(action)
+        grid, reward, done = game.step(action)
         game.render()
         clock.tick(10)  # Control the speed of the game
 
