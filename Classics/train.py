@@ -45,3 +45,15 @@ while not game.done:
 
 
 
+# for episode in range(num_episodes):
+#     state = env.reset()  # Reset the environment to start a new episode
+#     action = agent.choose_action(state)  # Choose an action for the current state
+
+#     while not done:
+#         next_state, reward, done, _ = env.step(action)  # Take action
+#         next_action = agent.choose_action(next_state)  # Choose next action
+        
+#         # Update Q-table using SARSA
+#         agent.update_q_table(state, action, reward, next_state, next_action)
+        
+#         state, action = next_state, next_action  # Move to the next state and action
