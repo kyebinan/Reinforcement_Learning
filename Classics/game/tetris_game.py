@@ -9,6 +9,9 @@ class TetrisGame(Game):
         super().__init__()
         self.width = width
         self.height = height
+        self.cell_size = 30
+        self.screen = pygame.display.set_mode((self.width * self.cell_size, self.height * self.cell_size))
+        pygame.display.set_caption('Snake Game')
         self.board = np.zeros((self.height, self.width), dtype=int)
         self.current_piece = None
         self.next_piece = self._get_new_piece()
@@ -43,59 +46,69 @@ class TetrisGame(Game):
 
     def step(self, action):
         self.frame_iteration += 1
+
+        # Handle left movement with boundary check
         if action == 0:  # Move left
-            if not self.check_collision(self.current_piece, (self.piece_position[0] - 1, self.piece_position[1])):
+            if not self.check_collision(self.current_piece, (self.piece_position[0] - 1, self.piece_position[1])) and \
+            self.is_within_boundaries(self.current_piece, (self.piece_position[0] - 1, self.piece_position[1])):
                 self.piece_position[0] -= 1
+
+        # Handle right movement with boundary check
         elif action == 1:  # Move right
-            if not self.check_collision(self.current_piece, (self.piece_position[0] + 1, self.piece_position[1])):
+            if not self.check_collision(self.current_piece, (self.piece_position[0] + 1, self.piece_position[1])) and \
+            self.is_within_boundaries(self.current_piece, (self.piece_position[0] + 1, self.piece_position[1])):
                 self.piece_position[0] += 1
+
+        # Handle rotation
         elif action == 2:  # Rotate
             rotated_piece = self.rotate_piece(self.current_piece)
-            if not self.check_collision(rotated_piece, self.piece_position):
+            if not self.check_collision(rotated_piece, self.piece_position) and \
+            self.is_within_boundaries(rotated_piece, self.piece_position):
                 self.current_piece = rotated_piece
-        elif action == 3:  # Drop
-            while not self.check_collision(self.current_piece, (self.piece_position[0], self.piece_position[1] + 1)):
-                self.piece_position[1] += 1
+
+        # Automatic drop (or manual if action == 3)
+        # The piece falls one step
+        if not self.check_collision(self.current_piece, (self.piece_position[0], self.piece_position[1] + 1)):
+            self.piece_position[1] += 1
+        else:
+            # Place the piece on the board
             self.add_piece_to_board(self.current_piece, self.piece_position)
             self.clear_lines()
+            # Move to the next piece
             self.current_piece = self.next_piece
             self.next_piece = self._get_new_piece()
             self.piece_position = [self.width // 2 - len(self.current_piece[0]) // 2, 0]
+            # Check for game over
             if self.check_collision(self.current_piece, self.piece_position):
                 self.game_over = True
                 self.done = True
+                return self.get_state(), -10, self.done  # Game over penalty
 
-        # Implement move down and game over check
-        if not self.done:
-            if self.check_collision(self.current_piece, (self.piece_position[0], self.piece_position[1] + 1)):
-                self.add_piece_to_board(self.current_piece, self.piece_position)
-                self.clear_lines()
-                self.current_piece = self.next_piece
-                self.next_piece = self._get_new_piece()
-                self.piece_position = [self.width // 2 - len(self.current_piece[0]) // 2, 0]
-                if self.check_collision(self.current_piece, self.piece_position):
-                    self.game_over = True
-                    self.done = True
-            else:
-                self.piece_position[1] += 1
+        return self.get_state(), 0, self.done  # Return default reward for other actions
 
-        return self.get_state(), self.score, self.done
+    def is_within_boundaries(self, piece, offset):
+        off_x, off_y = offset
+        for y, row in enumerate(piece):
+            for x, cell in enumerate(row):
+                if cell:
+                    # Check if the cell is outside the board's width
+                    if x + off_x < 0 or x + off_x >= self.width:
+                        return False
+        return True
 
-    def render(self, screen):
-        cell_size = 40
-        screen.fill((0, 0, 0))
-
+    def render(self):
+        self.screen.fill((0, 0, 0))
         # Draw the board
         for i in range(self.height):
             for j in range(self.width):
                 if self.board[i][j] == 1:
-                    pygame.draw.rect(screen, (255, 255, 255), [j * cell_size, i * cell_size, cell_size, cell_size])
+                    pygame.draw.rect(self.screen, (255, 255, 255), [j * self.cell_size, i * self.cell_size, self.cell_size, self.cell_size])
 
         # Draw the current piece
         for i, row in enumerate(self.current_piece):
             for j, cell in enumerate(row):
                 if cell == 1:
-                    pygame.draw.rect(screen, (255, 165, 0), [(self.piece_position[0] + j) * cell_size, (self.piece_position[1] + i) * cell_size, cell_size, cell_size])
+                    pygame.draw.rect(self.screen, (255, 165, 0), [(self.piece_position[0] + j) * self.cell_size, (self.piece_position[1] + i) * self.cell_size, self.cell_size, self.cell_size])
 
         pygame.display.flip()
 
@@ -136,55 +149,17 @@ class TetrisGame(Game):
 def main():
     pygame.init()
     game = TetrisGame(10, 20)
-    screen = pygame.display.set_mode((game.width * 40, game.height * 40))
-    pygame.display.set_caption("Tetris")
     clock = pygame.time.Clock()
 
-    fall_time = 0
-    fall_speed = 1000  # Milliseconds between each automatic step down
+    while not game.done:
+        action = random.randint(0, 3)
+        grid, reward, done = game.step(action)
+        game.render()
+        clock.tick(1)  # Control the speed of the game
 
-    running = True
-    while running:
-        # The time passed since the last tick, in milliseconds
-        delta_time = clock.tick(60)  # Run at max 60 frames per second
-        
-        fall_time += delta_time
-
-        if fall_time >= fall_speed:
-            fall_time = 0
-            game.step(3)  # Drop piece over time
-
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_LEFT:
-                    game.step(0)
-                elif event.key == pygame.K_RIGHT:
-                    game.step(1)
-                elif event.key == pygame.K_UP:
-                    game.step(2)
-                elif event.key == pygame.K_DOWN:
-                    # For an immediate drop, increase fall_speed temporarily or call game.step(3) multiple times.
-                    game.step(3)
-
-        screen.fill((0, 0, 0))
-        game.render(screen)
-        pygame.display.flip()
-
-        if game.game_over:
-            print("Game Over. Press any key to restart.")
-            waiting_for_input = True
-            while waiting_for_input:
-                for event in pygame.event.get():
-                    if event.type == pygame.QUIT:
-                        running = False
-                        waiting_for_input = False
-                    if event.type == pygame.KEYDOWN:
-                        game.reset()
-                        waiting_for_input = False
-
-    pygame.quit()
+        if game.done:
+            print("Game Over")
+            #game.reset()
 
 if __name__ == "__main__":
     main()
