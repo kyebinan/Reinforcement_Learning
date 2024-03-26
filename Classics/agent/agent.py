@@ -21,3 +21,12 @@ class Agent:
 
     def choose_action(self, state):
         return self.agent.choose_action(state)
+
+    def update_q_table(self, state, action, reward, next_state):
+        self.agent.update_q_table(self, state, action, reward, next_state)
+
+    def get_state(self, game):
+        """
+        This method would need specific implementation based on the game's state representation.
+        """
+        pass
