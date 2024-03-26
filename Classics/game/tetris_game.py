@@ -45,6 +45,7 @@ class TetrisGame(Game):
         return self.get_state()
 
     def step(self, action):
+        reward = 0
         # Handle left movement with boundary check
         if action == 0:  # Move left
             if not self.check_collision(self.current_piece, (self.piece_position[0] - 1, self.piece_position[1])) and \
@@ -72,6 +73,7 @@ class TetrisGame(Game):
             # Place the piece on the board
             self.add_piece_to_board(self.current_piece, self.piece_position)
             self.clear_lines()
+            reward = 1
             # Move to the next piece
             self.current_piece = self.next_piece
             self.next_piece = self._get_new_piece()
@@ -82,7 +84,8 @@ class TetrisGame(Game):
                 self.done = True
                 return self.get_state(), -10, self.done  # Game over penalty
 
-        return self.get_state(), 0, self.done  # Return default reward for other actions
+        # Return default reward for other actions
+        return self.get_state(), reward, self.done  
 
     def is_within_boundaries(self, piece, offset):
         off_x, off_y = offset
@@ -111,9 +114,7 @@ class TetrisGame(Game):
         pygame.display.flip()
 
     def get_state(self):
-        # Implement state representation (omitted for brevity)
-        # Could be the raw board, a flattened board, or additional features
-        return self.board.flatten()
+        return self.board
 
     def check_collision(self, piece, offset):
         off_x, off_y = offset
