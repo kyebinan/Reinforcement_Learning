@@ -35,12 +35,14 @@ class TetrisGame(Game):
         self.current_piece = self.next_piece
         self.next_piece = self._get_new_piece()
         self.piece_position = [0, self.width // 2 - len(self.current_piece[0]) // 2]
+        self.frame_iteration = 0
 
     def reset(self):
         self._reset()
         return self.get_state()
 
     def step(self, action):
+        self.frame_iteration += 1
         if action == 0:  # Move left
             if not self.check_collision(self.current_piece, (self.piece_position[0] - 1, self.piece_position[1])):
                 self.piece_position[0] -= 1
