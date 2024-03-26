@@ -45,8 +45,6 @@ class TetrisGame(Game):
         return self.get_state()
 
     def step(self, action):
-        self.frame_iteration += 1
-
         # Handle left movement with boundary check
         if action == 0:  # Move left
             if not self.check_collision(self.current_piece, (self.piece_position[0] - 1, self.piece_position[1])) and \
