@@ -1,21 +1,37 @@
 import sys
-import tqdm
+import numpy as np
+import matplotlib.pyplot as plt
 import pygame
 
-from agent.algo import QLearningAgent
+
+from agent.qlearning import QLearningAgent
 from game.snake_game import SnakeGame
 
 
-ALGO = "Random"
 STATE_SPACE_SIZE = 256
 ACTION_SPACE_SIZE = 4
 LEARNING_RATE = 0.1
 GAMMA = 0.9
 EPSILON = 0.1
+EPSILON_DECAY = 0.99
+EPSILON_MIN = 0.01 
 RENDER = True
-# Control the speed of the game ()
 SIMULATION_SPEED = 100
-NUM_EPISODES = 1000
+NUM_EPISODES = 200
+N_EP_RUNNING_AVG = 20
+
+
+
+def running_average(x, N):
+    ''' Function used to compute the running average
+        of the last N elements of a vector x
+    '''
+    if len(x) >= N:
+        y = np.copy(x)
+        y[N-1:] = np.convolve(x, np.ones((N, )) / N, mode='valid')
+    else:
+        y = np.zeros_like(x)
+    return y
 
 
 agent = QLearningAgent(  
@@ -24,17 +40,19 @@ agent = QLearningAgent(
                 alpha=LEARNING_RATE, 
                 gamma=GAMMA, 
                 epsilon=EPSILON,
-                epsilon_decay=0.99, 
-                epsilon_min=0.01
+                epsilon_decay=EPSILON_DECAY, 
+                epsilon_min=EPSILON_MIN
             )
 
 game = SnakeGame(30, 20)
 clock = pygame.time.Clock()
+episode_reward_list = []
 
 for EPISODE in range(NUM_EPISODES):
     game.reset()
     state, reward, done = game.get_state(), 0, game.done
     action = agent.choose_action(state)
+    total_episode_reward = 0.
 
     while not done:
         next_state, reward, done = game.step(action)
@@ -42,15 +60,42 @@ for EPISODE in range(NUM_EPISODES):
         agent.update_q_table(state, action, reward, next_state)
         state, action = next_state, next_action
 
+        # Update episode reward
+        total_episode_reward += reward
+
         if RENDER:
             game.render()
             clock.tick(SIMULATION_SPEED)  
 
         if done:
-            print("Game Over")
-            #game.reset()
+            print(f"Game Over - Episode{EPISODE} - Reward : {total_episode_reward}")
+
+    # Append episode reward
+    episode_reward_list.append(total_episode_reward)
+            
+avg_reward = np.mean(episode_reward_list)
+confidence = np.std(episode_reward_list) * 1.96 / np.sqrt(NUM_EPISODES)
 
 
+print('Policy achieves an average total reward of {:.1f} +/- {:.1f} with confidence 95%.'.format(
+                avg_reward,
+                confidence))
+
+
+# Plot Rewards and steps
+fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(16, 9))
+ax[0].plot([i for i in range(1, NUM_EPISODES+1)], episode_reward_list, label='Episode reward')
+ax[0].plot([i for i in range(1, NUM_EPISODES+1)], running_average(
+    episode_reward_list, N_EP_RUNNING_AVG), label='Avg. episode reward')
+ax[0].set_xlabel('Episodes')
+ax[0].set_ylabel('Total reward')
+ax[0].set_title('Total Reward vs Episodes')
+ax[0].legend()
+ax[0].grid(alpha=0.3)
+
+plt.show()
+
+agent.save_q_table()
 
 # for episode in range(num_episodes):
 #     state = env.reset()  # Reset the environment to start a new episode
