@@ -1,7 +1,7 @@
 import pygame
 import random
 import numpy as np
-from game import Game 
+from game.game import Game 
 
 
 class SnakeGame(Game):
@@ -19,10 +19,8 @@ class SnakeGame(Game):
     def reset(self):
         self.snake = [(self.width // 2, self.height // 2), (self.width // 2, 1 + self.height // 2)]
         self.direction = 'UP'
-        self.score = 0
         self.done = False
         self.food = self._spawn_food()
-        self.frame_iteration = 0
         return self.get_state()
 
     def _spawn_food(self):
@@ -32,8 +30,6 @@ class SnakeGame(Game):
                 return food
 
     def step(self, action):
-        self.frame_iteration += 1
-        
         # Get the next direction based on the action
         next_direction = self.directions[action]
         
@@ -54,19 +50,18 @@ class SnakeGame(Game):
             new_head[0] < 0 or new_head[0] >= self.width or
             new_head[1] < 0 or new_head[1] >= self.height):
             self.done = True
-            reward = -10  # Penalty for losing
+            reward = -100  # Penalty for losing
             return self.get_state(), reward, self.done
 
         # Check if snake eats food
         if new_head == self.food:
-            self.score += 1
             self.food = self._spawn_food()
             reward = 10  # Reward for eating food
             # Do not remove the tail, effectively growing the snake
         else:
             # Move the snake by removing the tail
             self.snake.pop()
-            reward = 0
+            reward = -1
 
         # Insert the new head to move the snake
         self.snake.insert(0, new_head)

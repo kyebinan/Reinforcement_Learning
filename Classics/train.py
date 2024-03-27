@@ -1,12 +1,9 @@
 import sys
 import tqdm
-import random
 import pygame
 
-
-from agent.agent import Agent
+from agent.algo import QLearningAgent
 from game.snake_game import SnakeGame
-from game.tetris_game import TetrisGame
 
 
 ALGO = "Random"
@@ -17,31 +14,41 @@ GAMMA = 0.9
 EPSILON = 0.1
 RENDER = True
 # Control the speed of the game ()
-SIMULATION_SPEED = 10  
+SIMULATION_SPEED = 100
+NUM_EPISODES = 1000
 
 
-agent = Agent(  state_space_size=STATE_SPACE_SIZE,
+agent = QLearningAgent(  
+                state_space_size=STATE_SPACE_SIZE,
                 action_space_size=ACTION_SPACE_SIZE,
-                algorithm="Random",
                 alpha=LEARNING_RATE, 
                 gamma=GAMMA, 
-                epsilon=EPSILON
+                epsilon=EPSILON,
+                epsilon_decay=0.99, 
+                epsilon_min=0.01
             )
 
 game = SnakeGame(30, 20)
 clock = pygame.time.Clock()
-grid, reward, _ = game.get_state(), 0, game.done
-while not game.done:
-    action = agent.choose_action(grid)
-    grid, reward, done = game.step(action)
 
-    if RENDER:
-        game.render()
-        clock.tick(SIMULATION_SPEED)  
+for EPISODE in range(NUM_EPISODES):
+    game.reset()
+    state, reward, done = game.get_state(), 0, game.done
+    action = agent.choose_action(state)
 
-    if game.done:
-        print("Game Over")
-        #game.reset()
+    while not done:
+        next_state, reward, done = game.step(action)
+        next_action = agent.choose_action(next_state)
+        agent.update_q_table(state, action, reward, next_state)
+        state, action = next_state, next_action
+
+        if RENDER:
+            game.render()
+            clock.tick(SIMULATION_SPEED)  
+
+        if done:
+            print("Game Over")
+            #game.reset()
 
 
 
