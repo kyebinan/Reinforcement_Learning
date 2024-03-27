@@ -84,3 +84,27 @@ class QLearningAgent():
         """
         # Decay epsilon
         self.epsilon = max(self.epsilon_min, self.epsilon * self.epsilon_decay)
+
+    def save_q_table(self, filename='q_table.npy'):
+        """
+        Saves the Q-table to a file.
+
+        Parameters:
+        - filename: The name of the file where the Q-table should be saved. The default name is 'q_table.npy'.
+        
+        Returns:
+        None.
+        """
+        np.save(filename, self.q_table)
+
+    def load_q_table(filename='q_table.npy'):
+        """
+        Loads a Q-table from a file.
+
+        Parameters:
+        - filename: The name of the file from which to load the Q-table. The default name is 'q_table.npy'.
+        
+        Returns:
+        - q_table: The loaded Q-table as a NumPy array.
+        """
+        return np.load(filename)
