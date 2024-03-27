@@ -7,7 +7,7 @@ from game.snake_game import SnakeGame
 
 
 ALGO = "Random"
-STATE_SPACE_SIZE = 600
+STATE_SPACE_SIZE = 256
 ACTION_SPACE_SIZE = 4
 LEARNING_RATE = 0.1
 GAMMA = 0.9
@@ -28,7 +28,7 @@ agent = QLearningAgent(
                 epsilon_min=0.01
             )
 
-game = SnakeGame(10, 10)
+game = SnakeGame(30, 20)
 clock = pygame.time.Clock()
 
 for EPISODE in range(NUM_EPISODES):

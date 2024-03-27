@@ -67,23 +67,25 @@ class SnakeGame(Game):
         self.snake.insert(0, new_head)
 
         return self.get_state(), reward, self.done
-
+    
     def get_state(self):
-        # Create an empty grid initialized with 0s
-        grid = np.zeros((self.height, self.width), dtype=int)
-        
-        # Place the food in the grid
+        head_x, head_y = self.snake[0]
         food_x, food_y = self.food
-        grid[food_y][food_x] = 1
-        
-        # Place the snake in the grid
-        for i, (x, y) in enumerate(self.snake):
-            if i == 0:  # Head of the snake
-                grid[y][x] = 2
-            else:  # Body of the snake
-                grid[y][x] = 2
-        
-        return grid_to_int(grid)
+
+        # Check for dangers
+        danger_left = (head_x - 1, head_y) in self.snake or head_x - 1 < 0
+        danger_right = (head_x + 1, head_y) in self.snake or head_x + 1 >= self.width
+        danger_up = (head_x, head_y - 1) in self.snake or head_y - 1 < 0
+        danger_down = (head_x, head_y + 1) in self.snake or head_y + 1 >= self.height
+
+        # Check for food direction
+        food_right = food_x > head_x
+        food_left = food_x < head_x
+        food_up = food_y < head_y
+        food_down = food_y > head_y
+        bools = [danger_left, danger_right, danger_up, danger_down, food_right, food_left, food_up, food_down]
+        state = booleans_to_int(bools)
+        return state
 
     def render(self):
         self.screen.fill((0, 0, 0))
@@ -95,15 +97,13 @@ class SnakeGame(Game):
         pygame.display.flip()
 
 
-def grid_to_int(grid):
-    base = 3
-    state_int = 0
-    num_cells = grid.size
-    # Flatten the grid and iterate over it, treating it as a base-4 number
-    for i, cell in enumerate(np.nditer(grid)):
-        state_int += cell * (base ** (num_cells - i - 1))
-    return state_int
-
+def booleans_to_int(bools):
+    """
+    Convert a tuple of 8 boolean values to an integer, treating each boolean
+    as a bit in a binary number.
+    """
+    binary_string = ''.join(['1' if b else '0' for b in bools])
+    return int(binary_string, 2)
 
 def main():
     game = SnakeGame(40, 30)
