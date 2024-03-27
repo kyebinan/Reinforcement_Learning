@@ -98,7 +98,7 @@ class QLearningAgent():
         """
         np.save(filename, self.q_table)
 
-    def load_q_table(filename='q_table.npy'):
+    def load_q_table(self, filename='q_table.npy'):
         """
         Loads a Q-table from a file.
 
@@ -108,4 +108,4 @@ class QLearningAgent():
         Returns:
         - q_table: The loaded Q-table as a NumPy array.
         """
-        return np.load(filename)
+        self.q_table =  np.load(filename)
