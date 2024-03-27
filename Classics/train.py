@@ -28,7 +28,7 @@ agent = QLearningAgent(
                 epsilon_min=0.01
             )
 
-game = SnakeGame(30, 20)
+game = SnakeGame(10, 10)
 clock = pygame.time.Clock()
 
 for EPISODE in range(NUM_EPISODES):

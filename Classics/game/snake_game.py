@@ -81,9 +81,9 @@ class SnakeGame(Game):
             if i == 0:  # Head of the snake
                 grid[y][x] = 2
             else:  # Body of the snake
-                grid[y][x] = 3
+                grid[y][x] = 2
         
-        return grid
+        return grid_to_int(grid)
 
     def render(self):
         self.screen.fill((0, 0, 0))
@@ -94,6 +94,15 @@ class SnakeGame(Game):
         pygame.draw.rect(self.screen, (213, 50, 80), food_rect)
         pygame.display.flip()
 
+
+def grid_to_int(grid):
+    base = 3
+    state_int = 0
+    num_cells = grid.size
+    # Flatten the grid and iterate over it, treating it as a base-4 number
+    for i, cell in enumerate(np.nditer(grid)):
+        state_int += cell * (base ** (num_cells - i - 1))
+    return state_int
 
 
 def main():
