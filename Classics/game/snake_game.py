@@ -56,7 +56,7 @@ class SnakeGame(Game):
         # Check if snake eats food
         if new_head == self.food:
             self.food = self._spawn_food()
-            reward = 10  # Reward for eating food
+            reward = 50  # Reward for eating food
             # Do not remove the tail, effectively growing the snake
         else:
             # Move the snake by removing the tail

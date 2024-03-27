@@ -15,10 +15,10 @@ GAMMA = 0.9
 EPSILON = 0.1
 EPSILON_DECAY = 0.99
 EPSILON_MIN = 0.01 
-RENDER = True
+RENDER = False
 SIMULATION_SPEED = 100
-NUM_EPISODES = 200
-N_EP_RUNNING_AVG = 20
+NUM_EPISODES = 2000
+N_EP_RUNNING_AVG = 50
 
 
 
@@ -68,7 +68,7 @@ for EPISODE in range(NUM_EPISODES):
             clock.tick(SIMULATION_SPEED)  
 
         if done:
-            print(f"Game Over - Episode{EPISODE} - Reward : {total_episode_reward}")
+            print(f"Game Over - Episode {EPISODE} - Reward : {total_episode_reward}")
 
     # Append episode reward
     episode_reward_list.append(total_episode_reward)
@@ -83,16 +83,18 @@ print('Policy achieves an average total reward of {:.1f} +/- {:.1f} with confide
 
 
 # Plot Rewards and steps
-fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(16, 9))
-ax[0].plot([i for i in range(1, NUM_EPISODES+1)], episode_reward_list, label='Episode reward')
-ax[0].plot([i for i in range(1, NUM_EPISODES+1)], running_average(
-    episode_reward_list, N_EP_RUNNING_AVG), label='Avg. episode reward')
-ax[0].set_xlabel('Episodes')
-ax[0].set_ylabel('Total reward')
-ax[0].set_title('Total Reward vs Episodes')
-ax[0].legend()
-ax[0].grid(alpha=0.3)
+fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(8, 6))
+plt.plot([i for i in range(1, NUM_EPISODES+1)], episode_reward_list, label='Episode reward')
+plt.plot([i for i in range(1, NUM_EPISODES+1)], running_average(
+    episode_reward_list, N_EP_RUNNING_AVG), label=f'{N_EP_RUNNING_AVG}-Episode Avg. reward')
 
+# Corrected method calls for setting labels and title
+plt.xlabel('Episodes')  # Corrected from plt.set_xlabel to plt.xlabel
+plt.ylabel('Total reward')  # Corrected from plt.set_ylabel to plt.ylabel
+plt.title('Total Reward vs Episodes')  # Corrected from plt.set_title to plt.title
+
+plt.legend()
+plt.grid(alpha=0.3)
 plt.show()
 
 agent.save_q_table()
