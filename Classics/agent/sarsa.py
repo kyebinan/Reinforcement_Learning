@@ -4,7 +4,6 @@ import random
 
 class SARSAAgent():
     def __init__(self, state_space_size, action_space_size, alpha=0.1, gamma=0.9, epsilon=1.0, epsilon_decay=0.99, epsilon_min=0.01):
-        super().__init__(action_space_size)
         self.action_space_size = action_space_size
         self.q_table = np.zeros((state_space_size, action_space_size))
         self.alpha = alpha  # Learning rate

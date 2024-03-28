@@ -177,5 +177,5 @@ def Sarsa():
 
 ################################
     
-QLearning()
-#Sarsa()
+# QLearning()
+Sarsa()

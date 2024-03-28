@@ -5,6 +5,7 @@ import pygame
 
 
 from agent.qlearning import QLearningAgent
+from agent.sarsa import SARSAAgent
 from game.snake_game import SnakeGame
 
 STATE_SPACE_SIZE = 256
@@ -19,8 +20,47 @@ SIMULATION_SPEED = 10
 NUM_EPISODES = 2000
 N_EP_RUNNING_AVG = 50
 
+def QLearning():
+    agent = QLearningAgent(  
+                    state_space_size=STATE_SPACE_SIZE,
+                    action_space_size=ACTION_SPACE_SIZE,
+                    alpha=LEARNING_RATE, 
+                    gamma=GAMMA, 
+                    epsilon=EPSILON,
+                    epsilon_decay=EPSILON_DECAY, 
+                    epsilon_min=EPSILON_MIN
+                )
 
-agent = QLearningAgent(  
+    agent.load_q_table()
+
+    game = SnakeGame(30, 20)
+    clock = pygame.time.Clock()
+    episode_reward_list = []
+
+    state, reward, done = game.get_state(), 0, game.done
+    action = agent.choose_action(state)
+
+    total_episode_reward = 0.
+
+    while not done:
+        next_state, reward, done = game.step(action)
+        next_action = agent.choose_action(next_state)
+        state, action = next_state, next_action
+
+        # Update episode reward
+        total_episode_reward += reward
+
+        if RENDER:
+            game.render()
+            clock.tick(SIMULATION_SPEED)  
+
+        if done:
+            print(f"Game Over - Reward : {total_episode_reward}")
+
+
+
+def Sarsa():
+    agent = SARSAAgent(  
                 state_space_size=STATE_SPACE_SIZE,
                 action_space_size=ACTION_SPACE_SIZE,
                 alpha=LEARNING_RATE, 
@@ -30,28 +70,35 @@ agent = QLearningAgent(
                 epsilon_min=EPSILON_MIN
             )
 
-agent.load_q_table()
+    agent.load_q_table()
 
-game = SnakeGame(30, 20)
-clock = pygame.time.Clock()
-episode_reward_list = []
+    game = SnakeGame(30, 20)
+    clock = pygame.time.Clock()
+    episode_reward_list = []
 
-state, reward, done = game.get_state(), 0, game.done
-action = agent.choose_action(state)
+    state, reward, done = game.get_state(), 0, game.done
+    action = agent.choose_action(state)
 
-total_episode_reward = 0.
+    total_episode_reward = 0.
 
-while not done:
-    next_state, reward, done = game.step(action)
-    next_action = agent.choose_action(next_state)
-    state, action = next_state, next_action
+    while not done:
+        next_state, reward, done = game.step(action)
+        next_action = agent.choose_action(next_state)
+        state, action = next_state, next_action
 
-    # Update episode reward
-    total_episode_reward += reward
+        # Update episode reward
+        total_episode_reward += reward
 
-    if RENDER:
-        game.render()
-        clock.tick(SIMULATION_SPEED)  
+        if RENDER:
+            game.render()
+            clock.tick(SIMULATION_SPEED)  
 
-    if done:
-        print(f"Game Over - Reward : {total_episode_reward}")
+        if done:
+            print(f"Game Over - Reward : {total_episode_reward}")
+
+
+################################
+
+# QLearning()    
+Sarsa()
+        
