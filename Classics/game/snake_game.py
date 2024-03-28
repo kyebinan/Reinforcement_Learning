@@ -29,7 +29,7 @@ class SnakeGame(Game):
             if food not in self.snake:
                 return food
 
-    def step(self, action):
+    def step(self, action, grid=False):
         # Get the next direction based on the action
         next_direction = self.directions[action]
         
@@ -66,7 +66,10 @@ class SnakeGame(Game):
         # Insert the new head to move the snake
         self.snake.insert(0, new_head)
 
-        return self.get_state(), reward, self.done
+        if not grid:
+            return self.get_state(), reward, self.done
+        else:
+            return self.get_state_grid(), reward, self.done
     
     def get_state(self):
         head_x, head_y = self.snake[0]
@@ -86,6 +89,24 @@ class SnakeGame(Game):
         bools = [danger_left, danger_right, danger_up, danger_down, food_right, food_left, food_up, food_down]
         state = booleans_to_int(bools)
         return state
+    
+    def get_state_grid(self):
+        # Create an empty grid initialized with 0s
+        grid = np.zeros((self.height, self.width))
+
+        
+        # Place the food in the grid
+        food_x, food_y = self.food
+        grid[food_y][food_x] = 1
+        
+        # Place the snake in the grid
+        for i, (x, y) in enumerate(self.snake):
+            if i == 0:  # Head of the snake
+                grid[y][x] = 2
+            else:  # Body of the snake
+                grid[y][x] = 3
+        print(grid)
+        return grid.flatten()
 
     def render(self):
         self.screen.fill((0, 0, 0))

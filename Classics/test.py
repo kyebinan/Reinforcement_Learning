@@ -35,7 +35,6 @@ def QLearning():
 
     game = SnakeGame(30, 20)
     clock = pygame.time.Clock()
-    episode_reward_list = []
 
     state, reward, done = game.get_state(), 0, game.done
     action = agent.choose_action(state)
@@ -74,7 +73,6 @@ def Sarsa():
 
     game = SnakeGame(30, 20)
     clock = pygame.time.Clock()
-    episode_reward_list = []
 
     state, reward, done = game.get_state(), 0, game.done
     action = agent.choose_action(state)
