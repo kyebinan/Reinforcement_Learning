@@ -3,13 +3,15 @@ import random
 
 
 class SARSAAgent():
-    def __init__(self, state_space_size, action_space_size, alpha=0.1, gamma=0.9, epsilon=0.1):
+    def __init__(self, state_space_size, action_space_size, alpha=0.1, gamma=0.9, epsilon=1.0, epsilon_decay=0.99, epsilon_min=0.01):
         super().__init__(action_space_size)
         self.action_space_size = action_space_size
         self.q_table = np.zeros((state_space_size, action_space_size))
         self.alpha = alpha  # Learning rate
         self.gamma = gamma  # Discount factor
         self.epsilon = epsilon  # Exploration rate
+        self.epsilon_decay = epsilon_decay  # Decay rate of epsilon over time
+        self.epsilon_min = epsilon_min  # Minimum value of epsilon
 
     def choose_action(self, state):
         # Epsilon-greedy action selection
@@ -52,7 +54,7 @@ class SARSAAgent():
         # Decay epsilon
         self.epsilon = max(self.epsilon_min, self.epsilon * self.epsilon_decay)
 
-    def save_q_table(self, filename='q_table.npy'):
+    def save_q_table(self, filename='q_table_sarsa.npy'):
         """
         Saves the Q-table to a file.
 
@@ -64,7 +66,7 @@ class SARSAAgent():
         """
         np.save(filename, self.q_table)
 
-    def load_q_table(self, filename='q_table.npy'):
+    def load_q_table(self, filename='q_table_sarsa.npy'):
         """
         Loads a Q-table from a file.
 
