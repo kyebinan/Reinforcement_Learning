@@ -176,6 +176,7 @@ def Sarsa():
 def DQLearning():
     STATE_SPACE_SIZE = 600
     BATCH_SIZE = 50
+    LEARNING_RATE = 0.005
     agent = DQNAgent(  
                     state_space_size=STATE_SPACE_SIZE,
                     action_space_size=ACTION_SPACE_SIZE,
@@ -197,7 +198,8 @@ def DQLearning():
         total_episode_reward = 0.
 
         while not done:
-            next_state, reward, done = game.step(action, grid=True)
+            _, reward, done = game.step(action)
+            next_state = game.get_state_grid()
             next_action = agent.choose_action(next_state)
             agent.remember(state, action, reward, next_state, done)
             agent.learn(BATCH_SIZE)
@@ -239,6 +241,8 @@ def DQLearning():
     plt.legend()
     plt.grid(alpha=0.3)
     plt.show()
+
+    agent.save()
 
 
 ################################

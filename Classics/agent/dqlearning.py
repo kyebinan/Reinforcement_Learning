@@ -39,11 +39,11 @@ class DQNAgent:
         self.memory.append((state, action, reward, next_state, done))
 
     def choose_action(self, state):
+        # print(f"State shape before processing: {state.shape}")
         if np.random.rand() <= self.epsilon:
             return random.randrange(self.action_size)
-       
         state = torch.FloatTensor(state).unsqueeze(0)  # Convert state to tensor and add batch dimension
-        print(state.shape)
+        # print(f"Processed state tensor shape: {state.shape}")  # Debugging print
         act_values = self.model(state)
         return np.argmax(act_values.cpu().data.numpy())
 
@@ -67,3 +67,23 @@ class DQNAgent:
 
             if self.epsilon > self.epsilon_min:
                 self.epsilon *= self.epsilon_decay
+
+    def save(self, filename='dqn_model.pth'):
+       """
+        Saves the model's state dictionary to a file.
+
+        Parameters:
+        - filename (str): The path to the file where the model's state dictionary should be saved.
+        """
+       torch.save(self.model.state_dict(), filename)
+       
+
+    def load(self, filename='dqn_model.pth'):
+        """
+        Loads the model's state dictionary from a file.
+
+        Parameters:
+        - filename (str): The path to the file from which the model's state dictionary should be loaded.
+        """
+        self.model.load_state_dict(torch.load(filename))
+        self.model.eval()  # Set the model to evaluation mode
