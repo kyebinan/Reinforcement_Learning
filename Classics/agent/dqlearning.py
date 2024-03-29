@@ -10,10 +10,10 @@ class DQN(nn.Module):
     def __init__(self, state_space_size, action_space_size):
         super(DQN, self).__init__()
         self.relu = nn.ReLU()
-        self.fc1 = nn.Linear(state_space_size, 128)
-        self.fc2 = nn.Linear(128, 128)
-        self.fc3 = nn.Linear(128, 128)
-        self.fc4 = nn.Linear(128, action_space_size)
+        self.fc1 = nn.Linear(state_space_size, 64)
+        self.fc2 = nn.Linear(64, 64)
+        self.fc3 = nn.Linear(64, 64)
+        self.fc4 = nn.Linear(64, action_space_size)
 
     def forward(self, x):
         x = self.relu(self.fc1(x))
@@ -76,7 +76,7 @@ class DQNAgent:
         - filename (str): The path to the file where the model's state dictionary should be saved.
         """
        torch.save(self.model.state_dict(), filename)
-       
+
 
     def load(self, filename='dqn_model.pth'):
         """

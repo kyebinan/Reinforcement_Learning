@@ -95,14 +95,14 @@ class SnakeGame(Game):
 
         # Place the food in the grid
         food_x, food_y = self.food
-        grid[food_y][food_x] = 1.
+        grid[food_y][food_x] = 1./3.
         
         # Place the snake in the grid
         for i, (x, y) in enumerate(self.snake):
             if i == 0:  # Head of the snake
-                grid[y][x] = 2.
+                grid[y][x] = 2./3.
             else:  # Body of the snake
-                grid[y][x] = 3.
+                grid[y][x] = 3./3.
         return grid.flatten()
 
     def render(self):
