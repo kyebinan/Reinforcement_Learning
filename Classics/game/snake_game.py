@@ -103,6 +103,7 @@ class SnakeGame(Game):
         #         grid[y][x] = 2./3.
         #     else:  # Body of the snake
         #         grid[y][x] = 3./3.
+        # return grid.flatten()
 
         head_x, head_y = self.snake[0]
         food_x, food_y = self.food

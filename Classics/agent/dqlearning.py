@@ -27,13 +27,20 @@ class DQNAgent:
         self.state_size = state_space_size
         self.action_size = action_space_size
         self.memory = deque(maxlen=2000)
-        self.gamma = gamma   # discount rate
+        self.gamma = gamma  # discount rate
         self.epsilon = epsilon  # exploration rate
         self.epsilon_min = epsilon_min
         self.epsilon_decay = epsilon_decay
         self.learning_rate = alpha
         self.model = DQN(state_space_size, action_space_size)
+        self.target_model = DQN(state_space_size, action_space_size)
         self.optimizer = optim.Adam(self.model.parameters(), lr=self.learning_rate)
+        # Initialize target model with the same weights as the model
+        self.update_target_network()
+
+    def update_target_network(self):
+        """Copy weights from the model to the target model."""
+        self.target_model.load_state_dict(self.model.state_dict())
 
     def remember(self, state, action, reward, next_state, done):
         self.memory.append((state, action, reward, next_state, done))
@@ -49,28 +56,54 @@ class DQNAgent:
 
     def learn(self, batch_size):
         if len(self.memory) < batch_size:
-            return
+            return  # not enough experiences in memory to learn
 
         minibatch = random.sample(self.memory, batch_size)
         states, actions, rewards, next_states, dones = zip(*minibatch)
 
         states = torch.FloatTensor(states)
-        actions = torch.LongTensor(actions)
+        actions = torch.LongTensor(actions).unsqueeze(1)  # add dimension for gather
         rewards = torch.FloatTensor(rewards)
         next_states = torch.FloatTensor(next_states)
         dones = torch.FloatTensor(dones)
+        
+        # Get Q values for current states
+        current_q_values = self.model(states).gather(1, actions).squeeze(1)
+        
+        # Compute the expected Q values from the next states using the target network
+        next_q_values = self.target_model(next_states).detach().max(1)[0]
+        expected_q_values = rewards + (self.gamma * next_q_values * (1 - dones))
 
-        Q_values = self.model(states).gather(1, actions.unsqueeze(-1)).squeeze(-1)
-        next_Q_values = self.model(next_states).detach().max(1)[0]
-        targets = rewards + self.gamma * next_Q_values * (1 - dones)
-
-        loss = nn.SmoothL1Loss()(Q_values, targets)
+        # Compute loss
+        loss = nn.MSELoss()(current_q_values, expected_q_values)
+        
+        # Optimize the model
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
 
-        if self.epsilon > self.epsilon_min:
-            self.epsilon *= self.epsilon_decay
+    def decay_epsilon(self):
+        """
+        Decays the exploration rate (epsilon) according to a predefined decay rate.
+
+        This method reduces the value of epsilon by multiplying it by a decay factor,
+        ensuring that the exploration rate doesn't fall below a specified minimum value.
+        The purpose of decaying epsilon over time is to gradually shift the balance
+        from exploration to exploitation as the agent learns about the environment.
+        Early in training, a higher epsilon encourages exploration of the state space.
+        As learning progresses, reducing epsilon helps the agent to exploit the learned
+        policy by choosing actions that it has learned to be effective.
+
+        Parameters:
+        None.
+
+        Returns:
+        None. The method updates the epsilon attribute of the agent in place.
+        """
+        # Decay epsilon
+        self.epsilon = max(self.epsilon_min, self.epsilon * self.epsilon_decay)
+
+        
 
     def save(self, filename='dqn_model.pth'):
        """
