@@ -236,8 +236,8 @@ def DQLearning():
 
     # Plot Rewards and steps
     fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(8, 6))
-    plt.plot([i for i in range(1, EPISODES+1)], episode_reward_list, label='Episode reward')
-    plt.plot([i for i in range(1, EPISODES+1)], running_average(
+    plt.plot([i for i in range(0, EPISODES+1)], episode_reward_list, label='Episode reward')
+    plt.plot([i for i in range(0, EPISODES+1)], running_average(
         episode_reward_list, N_EP_RUNNING_AVG), label=f'{N_EP_RUNNING_AVG}-Episode Avg. reward')
 
     # Corrected method calls for setting labels and title
