@@ -16,6 +16,8 @@ This makes SARSA an on-policy algorithm in contrast to the off-policy nature of 
 
 <img src="https://github.com/kyebinan/Reinforcement_Learning/blob/main/Classics/images/sarsa_snake.png?raw=true" alt="Q-Learning Snake" width="600" height="400">
 
+https://github.com/kyebinan/Reinforcement_Learning/assets/155234248/f3ee5432-ba1c-4ebc-906f-c69f08e0c2f9
+
 
 ## 3- Deep Q-Networks (DQN)
 Building on Q-Learning, DQN uses deep neural networks to approximate Q-values, allowing it to handle high-dimensional state spaces. Key innovations include experience replay and fixed Q-targets to stabilize training.
