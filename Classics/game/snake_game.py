@@ -90,20 +90,36 @@ class SnakeGame(Game):
         return state
     
     def get_state_grid(self):
-        # Create an empty grid initialized with 0s
-        grid = np.zeros((self.height, self.width))
+        # # Create an empty grid initialized with 0s
+        # grid = np.zeros((self.height, self.width))
 
-        # Place the food in the grid
-        food_x, food_y = self.food
-        grid[food_y][food_x] = 1./3.
+        # # Place the food in the grid
+        # food_x, food_y = self.food
+        # grid[food_y][food_x] = 1./3.
         
-        # Place the snake in the grid
-        for i, (x, y) in enumerate(self.snake):
-            if i == 0:  # Head of the snake
-                grid[y][x] = 2./3.
-            else:  # Body of the snake
-                grid[y][x] = 3./3.
-        return grid.flatten()
+        # # Place the snake in the grid
+        # for i, (x, y) in enumerate(self.snake):
+        #     if i == 0:  # Head of the snake
+        #         grid[y][x] = 2./3.
+        #     else:  # Body of the snake
+        #         grid[y][x] = 3./3.
+
+        head_x, head_y = self.snake[0]
+        food_x, food_y = self.food
+
+        # Check for dangers
+        danger_left = (head_x - 1, head_y) in self.snake or head_x - 1 < 0
+        danger_right = (head_x + 1, head_y) in self.snake or head_x + 1 >= self.width
+        danger_up = (head_x, head_y - 1) in self.snake or head_y - 1 < 0
+        danger_down = (head_x, head_y + 1) in self.snake or head_y + 1 >= self.height
+
+        # Check for food direction
+        food_right = food_x > head_x
+        food_left = food_x < head_x
+        food_up = food_y < head_y
+        food_down = food_y > head_y
+        bools = [danger_left, danger_right, danger_up, danger_down, food_right, food_left, food_up, food_down]
+        return np.array(bools).astype(float)
 
     def render(self):
         self.screen.fill((0, 0, 0))

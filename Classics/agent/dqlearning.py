@@ -10,10 +10,10 @@ class DQN(nn.Module):
     def __init__(self, state_space_size, action_space_size):
         super(DQN, self).__init__()
         self.relu = nn.ReLU()
-        self.fc1 = nn.Linear(state_space_size, 64)
-        self.fc2 = nn.Linear(64, 64)
-        self.fc3 = nn.Linear(64, 64)
-        self.fc4 = nn.Linear(64, action_space_size)
+        self.fc1 = nn.Linear(state_space_size, 24)
+        self.fc2 = nn.Linear(24, 24)
+        self.fc3 = nn.Linear(24, 24)
+        self.fc4 = nn.Linear(24, action_space_size)
 
     def forward(self, x):
         x = self.relu(self.fc1(x))
@@ -48,25 +48,29 @@ class DQNAgent:
         return np.argmax(act_values.cpu().data.numpy())
 
     def learn(self, batch_size):
-        if len(self.memory) > batch_size :
-            minibatch = random.sample(self.memory, batch_size)
-            for state, action, reward, next_state, done in minibatch:
-                target = reward
-                if not done:
-                    next_state = torch.FloatTensor(next_state).unsqueeze(0)
-                    target = (reward + self.gamma * np.amax(self.model(next_state).cpu().data.numpy()))
-                state = torch.FloatTensor(state).unsqueeze(0)
-                target_f = self.model(state).cpu().data.numpy()
-                target_f[0][action] = target
-                target_f = torch.FloatTensor(target_f)
-                self.optimizer.zero_grad()
-                output = self.model(state)
-                loss = nn.MSELoss()(output, target_f)
-                loss.backward()
-                self.optimizer.step()
+        if len(self.memory) < batch_size:
+            return
 
-            if self.epsilon > self.epsilon_min:
-                self.epsilon *= self.epsilon_decay
+        minibatch = random.sample(self.memory, batch_size)
+        states, actions, rewards, next_states, dones = zip(*minibatch)
+
+        states = torch.FloatTensor(states)
+        actions = torch.LongTensor(actions)
+        rewards = torch.FloatTensor(rewards)
+        next_states = torch.FloatTensor(next_states)
+        dones = torch.FloatTensor(dones)
+
+        Q_values = self.model(states).gather(1, actions.unsqueeze(-1)).squeeze(-1)
+        next_Q_values = self.model(next_states).detach().max(1)[0]
+        targets = rewards + self.gamma * next_Q_values * (1 - dones)
+
+        loss = nn.SmoothL1Loss()(Q_values, targets)
+        self.optimizer.zero_grad()
+        loss.backward()
+        self.optimizer.step()
+
+        if self.epsilon > self.epsilon_min:
+            self.epsilon *= self.epsilon_decay
 
     def save(self, filename='dqn_model.pth'):
        """
