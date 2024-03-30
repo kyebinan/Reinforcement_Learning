@@ -31,7 +31,7 @@ def QLearning():
                     epsilon_min=EPSILON_MIN
                 )
 
-    agent.load_q_table()
+    agent.load_q_table(filename='./models/q_table.npy')
 
     game = SnakeGame(30, 20)
     clock = pygame.time.Clock()
@@ -69,7 +69,7 @@ def Sarsa():
                 epsilon_min=EPSILON_MIN
             )
 
-    agent.load_q_table()
+    agent.load_q_table(filename='./models/q_table_sarsa.npy')
 
     game = SnakeGame(30, 20)
     clock = pygame.time.Clock()
@@ -109,7 +109,7 @@ def DQLearning():
                     epsilon_min=EPSILON_MIN
                 )
 
-    agent.load( filename='dqn_model.pth')
+    agent.load(filename='./models/dqn_model.pth')
 
     game = SnakeGame(30, 20)
     clock = pygame.time.Clock()

@@ -23,7 +23,6 @@ NUM_EPISODES = 3000
 N_EP_RUNNING_AVG = 50
 
 
-
 def running_average(x, N):
     ''' Function used to compute the running average
         of the last N elements of a vector x
