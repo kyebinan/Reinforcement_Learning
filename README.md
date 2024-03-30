@@ -6,6 +6,8 @@ Q-Learning is foundational for understanding how agents can learn to act optimal
 
 <img src="https://github.com/kyebinan/Reinforcement_Learning/blob/main/Classics/images/qlearning_snake.png?raw=true" alt="Q-Learning Snake" width="600" height="400">
 
+https://github.com/kyebinan/Reinforcement_Learning/assets/155234248/98dcac3a-bbc7-43a1-b3c9-8ae03ea50cbe
+
 
 
 ## 2- SARSA (State-Action-Reward-State-Action)
