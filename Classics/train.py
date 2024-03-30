@@ -174,9 +174,9 @@ def Sarsa():
 
 
 def DQLearning():
-    STATE_SPACE_SIZE = 600
+    STATE_SPACE_SIZE = 8
     BATCH_SIZE = 50
-    LEARNING_RATE = 0.01
+    LEARNING_RATE = 0.001
     agent = DQNAgent(  
                     state_space_size=STATE_SPACE_SIZE,
                     action_space_size=ACTION_SPACE_SIZE,
@@ -218,8 +218,12 @@ def DQLearning():
         # Append episode reward
         episode_reward_list.append(total_episode_reward)
         agent.decay_epsilon()
-        if EPISODE % 50 == 0:
+        if EPISODE % 25 == 0:
             agent.update_target_network()
+
+        if total_episode_reward >= 500 and np.mean(episode_reward_list) >= 300:
+            agent.save()
+            break
                 
     avg_reward = np.mean(episode_reward_list)
     confidence = np.std(episode_reward_list) * 1.96 / np.sqrt(NUM_EPISODES)
