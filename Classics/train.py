@@ -253,8 +253,19 @@ def DQLearning():
     agent.save()
 
 
-################################
     
-# QLearning()
-# Sarsa()
-# DQLearning()
+# Check if at least one argument is provided
+if len(sys.argv) > 1:
+    match sys.argv[1]:
+        case "qlearning":
+            QLearning()
+        case "sarsa":
+            Sarsa()
+        case "dqlearning":
+            DQLearning()
+    
+else:
+    print("No arguments provided.")
+    print("Run python3 `algorithm`")
+    print("`algorithm` can be qlearnig, sarsa, dqlearning")
+    

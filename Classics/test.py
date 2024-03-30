@@ -1,5 +1,7 @@
 import sys
 import pygame
+import matplotlib.pyplot as plt 
+import numpy as np
 
 from agent.dqlearning import DQNAgent
 from agent.qlearning import QLearningAgent
@@ -134,8 +136,24 @@ def DQLearning():
             print(f"Game Over - Reward : {total_episode_reward}")
 
 
-################################
 
-# QLearning()    
-Sarsa()
+
+# Check if at least one argument is provided
+if len(sys.argv) > 1:
+    match sys.argv[1]:
+        case "qlearning":
+            QLearning()
+        case "sarsa":
+            Sarsa()
+        case "dqlearning":
+            DQLearning()
+    
+else:
+    print("No arguments provided.")
+    print("Run python3 `algorithm`")
+    print("`algorithm` can be qlearnig, sarsa, dqlearning")
+    print()    
+    print("Run Q-Learning by default.")
+    QLearning()
+
         

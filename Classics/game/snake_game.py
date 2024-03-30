@@ -90,20 +90,6 @@ class SnakeGame(Game):
         return state
     
     def get_state_grid(self):
-        # # Create an empty grid initialized with 0s
-        # grid = np.zeros((self.height, self.width))
-
-        # # Place the food in the grid
-        # food_x, food_y = self.food
-        # grid[food_y][food_x] = 1./3.
-        
-        # # Place the snake in the grid
-        # for i, (x, y) in enumerate(self.snake):
-        #     if i == 0:  # Head of the snake
-        #         grid[y][x] = 2./3.
-        #     else:  # Body of the snake
-        #         grid[y][x] = 3./3.
-        # return grid.flatten()
 
         head_x, head_y = self.snake[0]
         food_x, food_y = self.food
