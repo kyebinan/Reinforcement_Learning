@@ -12,14 +12,12 @@ class DQN(nn.Module):
         self.relu = nn.ReLU()
         self.fc1 = nn.Linear(state_space_size, 24)
         self.fc2 = nn.Linear(24, 24)
-        self.fc3 = nn.Linear(24, 24)
-        self.fc4 = nn.Linear(24, action_space_size)
+        self.fc3 = nn.Linear(24, action_space_size)
 
     def forward(self, x):
         x = self.relu(self.fc1(x))
         x = self.relu(self.fc2(x))
-        x = self.relu(self.fc3(x))
-        return self.fc4(x)
+        return self.fc3(x)
 
 
 class DQNAgent:
@@ -61,11 +59,19 @@ class DQNAgent:
         minibatch = random.sample(self.memory, batch_size)
         states, actions, rewards, next_states, dones = zip(*minibatch)
 
+        # Efficient conversion: First convert to a NumPy array, then to a Tensor
+        states = np.array(states)
+        actions = np.array(actions)
+        rewards = np.array(rewards)
+        next_states = np.array(next_states)
+        dones = np.array(dones)
+
         states = torch.FloatTensor(states)
-        actions = torch.LongTensor(actions).unsqueeze(1)  # add dimension for gather
+        actions = torch.LongTensor(actions).unsqueeze(1)  # Add dimension for gather
         rewards = torch.FloatTensor(rewards)
         next_states = torch.FloatTensor(next_states)
         dones = torch.FloatTensor(dones)
+
         
         # Get Q values for current states
         current_q_values = self.model(states).gather(1, actions).squeeze(1)
