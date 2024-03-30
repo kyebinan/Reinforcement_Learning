@@ -22,6 +22,9 @@ https://github.com/kyebinan/Reinforcement_Learning/assets/155234248/f3ee5432-ba1
 ## 3- Deep Q-Networks (DQN)
 Building on Q-Learning, DQN uses deep neural networks to approximate Q-values, allowing it to handle high-dimensional state spaces. Key innovations include experience replay and fixed Q-targets to stabilize training.
 
+https://github.com/kyebinan/Reinforcement_Learning/assets/155234248/4f43083d-6a9e-4661-8a5a-11b5a649739d
+
+
 ## 4- Policy Gradient Methods
 These methods, including the REINFORCE algorithm, learn a parameterized policy that can select actions without consulting a value function. 
 The approach is based on optimizing the expected return by adjusting the policy parameters in the direction of the gradient of the expected return.
