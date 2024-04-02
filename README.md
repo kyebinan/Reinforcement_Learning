@@ -22,6 +22,8 @@ https://github.com/kyebinan/Reinforcement_Learning/assets/155234248/f3ee5432-ba1
 ## 3- Deep Q-Networks (DQN)
 Building on Q-Learning, DQN uses deep neural networks to approximate Q-values, allowing it to handle high-dimensional state spaces. Key innovations include experience replay and fixed Q-targets to stabilize training.
 
+<img src="https://github.com/kyebinan/Reinforcement_Learning/blob/main/Classics/images/dqlearning.png?raw=true" alt="Q-Learning Snake" width="600" height="400">
+
 https://github.com/kyebinan/Reinforcement_Learning/assets/155234248/4f43083d-6a9e-4661-8a5a-11b5a649739d
 
 
