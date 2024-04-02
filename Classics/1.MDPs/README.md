@@ -17,7 +17,7 @@ MDPs are controlled Markov chains. This means that the distribution of the state
 selected action. Let Ht = (s1 , a1 , s2 , a2 , . . . , at−1 , st ) denote the history up to time t. Then, we have: 
   - Formula
 
-In the above, pt (·|s, a) represent the transition probabilities of the system at time t given that the state and the action at time t are (s, a).
+In the above, pt (·|s, a) represents the transition probabilities of the system at time t given that the state and the action at time t are (s, a).
 The transition probabilities are called stationary if they do not depend on time t, i.e., pt (·|s, a) = p(·|s, a).
 
 ### Reward function. 
@@ -31,3 +31,4 @@ at time t are (s, a). The reward function is stationary if it does not depend on
   - Stationary MDPs with terminal state.
   - Infinite-time horizon discounted MDPs
 
+## 
