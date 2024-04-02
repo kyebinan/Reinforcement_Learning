@@ -31,4 +31,6 @@ at time t are (s, a). The reward function is stationary if it does not depend on
   - Stationary MDPs with terminal state.
   - Infinite-time horizon discounted MDPs
 
-## 
+## Solving finite-time horizon MDPs
+
+## Solving stationary MDPs with terminal state and infinite-time horizon discounted MDPs
