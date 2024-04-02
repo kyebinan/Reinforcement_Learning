@@ -24,3 +24,10 @@ The transition probabilities are called stationary if they do not depend on time
 In most cases, we assume that the decision maker collects a deterministic reward at time t equal to rt (s, a) where (s, a) is the state and action pair at time t. 
 Sometimes, it might be useful to consider random rewards, in which case we denote by qt (·|s, a) the reward distribution at time t given that the state and the action 
 at time t are (s, a). The reward function is stationary if it does not depend on t.
+
+## Three classes of MDPs
+
+  - Finite-time horizon MDPs.
+  - Stationary MDPs with terminal state.
+  - Infinite-time horizon discounted MDPs
+
