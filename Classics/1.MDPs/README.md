@@ -1,42 +1,67 @@
-# Markov Decesion Processes
 
-MDPs are controlled Markov chains. We define below the state and action space, before actually
-explaining what controlled Markov chains mean.
+# Markov Decision Processes
 
-### State space.
-The system is characterized at time t = 1, 2, . . . by its state st ∈ S. Unless otherwise
-specified, S is finite and of cardinality S.
+Markov Decision Processes (MDPs) provide a formal framework for making decisions in environments where outcomes are partially random and partially under the control of a decision-maker. This chapter delves into the core aspects of MDPs, including their definition, various classes, and solution methods.
 
-### Action space. 
-In any state s ∈ S, the decision maker may select an action a ∈ As , that in
-turn will impact the collected reward, and the system dynamics. Unless otherwise specficied, As
-is finite, and we denote by A the cardinality of ∪s As .
+## 2 Markov Decision Processes
 
-### Controlled Markov chains. 
-MDPs are controlled Markov chains. This means that the distribution of the state at time t + 1 depends on the past only through the state at time t and the
-selected action. Let Ht = (s1 , a1 , s2 , a2 , . . . , at−1 , st ) denote the history up to time t. Then, we have: 
-  - Formula
+MDPs are essentially controlled Markov chains. Here, we outline the state and action space before diving into what it means to control Markov chains.
 
-In the above, pt (·|s, a) represents the transition probabilities of the system at time t given that the state and the action at time t are (s, a).
-The transition probabilities are called stationary if they do not depend on time t, i.e., pt (·|s, a) = p(·|s, a).
+### State Space
 
-### Reward function. 
-In most cases, we assume that the decision maker collects a deterministic reward at time t equal to rt (s, a) where (s, a) is the state and action pair at time t. 
-Sometimes, it might be useful to consider random rewards, in which case we denote by qt (·|s, a) the reward distribution at time t given that the state and the action 
-at time t are (s, a). The reward function is stationary if it does not depend on t.
+The system's state at time `t` is represented by `st` in set `S`. Unless specified otherwise, `S` is finite with cardinality `S`.
 
-## Three classes of MDPs
+### Action Space
 
-  - Finite-time horizon MDPs.
-  - Stationary MDPs with terminal state.
-  - Infinite-time horizon discounted MDPs
+For any state `s ∈ S`, the decision-maker can choose an action `a ∈ As`, impacting the collected reward and the system's dynamics. Unless specified otherwise, `As` is finite, and `A` is the cardinality of the union of all `As`.
 
-## Solving finite-time horizon MDPs
+### Controlled Markov Chains
 
-## Solving stationary MDPs with terminal state and infinite-time horizon discounted MDPs
+MDPs are controlled Markov chains, implying that the future state's distribution only depends on the current state and action, not the full history up to that point. This is described by the transition probabilities `pt(s|st, a)`.
 
-## Value and Policy Iteration algorithms
+### Reward Function
 
-### Value Iteration algorithm
+A deterministic reward `rt(s, a)` is assumed to be collected at time `t`, which can be deterministic or stochastic, represented by `qt(·|s, a)` for the reward distribution.
 
-### Policy Iteration algorithm
+## 2.1 Three Classes of MDPs
+
+### Finite-time Horizon MDPs
+
+The objective here is to maximize the expected reward for the first `T` steps.
+
+### Stationary MDPs with Terminal State
+
+These problems assume stationary transition probabilities and rewards, along with a terminal state after reaching which no rewards are collected.
+
+### Infinite-time Horizon Discounted MDPs
+
+Here, rewards are discounted by a factor `λ ∈ (0, 1)`, and the goal is to maximize the expected discounted reward over an infinite horizon.
+
+## 2.2 Solving Finite-time Horizon MDPs
+
+This involves procedures to evaluate the reward of a given policy and to identify an optimal policy along with its reward through policy evaluation and the optimal policy definition.
+
+### Policy Evaluation
+
+For a given Markovian deterministic policy `π`, we can compute the state value functions and subsequently the expected reward under `π`.
+
+### The Optimal Policy
+
+The value function of an MDP is defined as the state value function of the optimal policy. This can be computed using a backward induction process known as Dynamic Programming (DP).
+
+## 2.3 Solving Stationary MDPs with Terminal State and Infinite-time Horizon Discounted MDPs
+
+Both types of problems can be approached using similar methods, with the main difference being the consideration of a discount factor in infinite-time horizon MDPs.
+
+### Policy Evaluation
+
+For a stationary Markovian deterministic policy `π`, the state value function `Vπ` maps the current state to the expected discounted reward collected under `π`.
+
+### The Optimal Policy
+
+The value function `V` is the state value function of an optimal policy, found as the unique solution of Bellman’s equations.
+
+## Solution Methods
+
+For finite-time horizon MDPs, we can use policy evaluation to assess the reward of a given policy and dynamic programming to find an optimal policy. Stationary and infinite-time horizon discounted MDPs can be addressed with policy iteration and value iteration algorithms, aiming to find policies that maximize expected rewards under the given conditions.
+
