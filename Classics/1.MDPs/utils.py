@@ -21,13 +21,10 @@ BRIGHT_PURPLE = '#8000FF';
 BRIGHT_ORANGE = '#F57A09';
 
 
-def draw_grid(grid, mdp):
+def draw_grid(grid):
 
     # Map a color to each cell in the grid
-    if mdp == "Vaccum":
-        col_map = {0: WHITE, 1: GREY, 2: BLACK,};
-    elif mdp == "Maze":
-        col_map = {0: WHITE, 1: BLACK, 2: LIGHT_GREEN, -6: LIGHT_RED, -1: LIGHT_RED};
+    col_map = {0: WHITE, 1: BLACK, 2: LIGHT_GREEN, -6: LIGHT_RED, -1: LIGHT_RED};
 
     # Give a color to each cell
     rows,cols    = grid.shape;
