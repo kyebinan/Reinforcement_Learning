@@ -146,11 +146,11 @@ class Maze:
         self.transition_probabilities = self.compute_transitions()
         self.rewards                  = self.compute_rewards()
 
-        self.new_num_states_to_position   = self.new_dict_states()[0]
-        self.new_position_states_to_num   = self.new_dict_states()[1]
-        self.new_n_states                 = len(self.new_num_states_to_position)
-        self.transition_new_probabilities = self.compute_new_transitions()
-        self.new_rewards                  = self.compute_new_rewards()
+        # self.new_num_states_to_position   = self.new_dict_states()[0]
+        # self.new_position_states_to_num   = self.new_dict_states()[1]
+        # self.new_n_states                 = len(self.new_num_states_to_position)
+        # self.transition_new_probabilities = self.compute_new_transitions()
+        # self.new_rewards                  = self.compute_new_rewards()
 
 
     def trade_off_minotaur_move(self, list_move, pos_agent):
@@ -245,6 +245,48 @@ class Maze:
             return init_pos
         else:
             return (row, col)
+        
+    
+    def minotaur_move(self, init_pos):
+        """ Makes a step in the maze, given a current position and an action.
+            :return tuple next_cell: Position (x,y) on the maze that agent transitions to.
+        """
+        # specifies the possible movements according to the border on which the minotaur is located
+        y_max, x_max = self.maze.shape[0] - 1, self.maze.shape[1] - 1
+        hash_map_y = {0     : (self.MOVE_LEFT, self.MOVE_RIGHT, self.MOVE_DOWN),
+                      y_max : (self.MOVE_LEFT, self.MOVE_RIGHT, self.MOVE_UP)}
+
+        hash_map_x = {0     : (self.MOVE_RIGHT, self.MOVE_DOWN, self.MOVE_UP),
+                      x_max : (self.MOVE_LEFT,self.MOVE_DOWN, self.MOVE_UP)}
+
+        y,x = init_pos
+        possible_moves = []
+        if (x == 0 or x == x_max) and (y == 0 or y == y_max) :
+            #possible_moves = tuple(set(moves_dico_x[x]) & set(moves_dico_y[y]))
+            possible_moves = tuple(item for item in hash_map_x[x] if item in hash_map_y[y])
+            action = random.choice(possible_moves)
+
+        elif (x == 0 or x == x_max):
+            possible_moves = hash_map_x[x]
+            action = random.choice(possible_moves)
+
+        elif (y == 0 or y == y_max):
+            possible_moves = hash_map_y[y]
+            action = random.choice(possible_moves)
+
+        else :
+            possible_moves = [self.MOVE_LEFT, self.MOVE_RIGHT, self.MOVE_UP, self.MOVE_DOWN]
+            action = random.choice(possible_moves)
+
+        # Compute the future position given current (state, action)
+        #row = y + self.actions[action][0];
+        #col = x + self.actions[action][1];
+        new_positions = []
+        for act in possible_moves:
+            row = y + self.actions[act][0];
+            col = x + self.actions[act][1];
+            new_positions += [(row, col)]
+        return new_positions
 
 
     def compute_rewards(self):
