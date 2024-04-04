@@ -1,4 +1,5 @@
 import numpy as np
+import random
 
 
 def dynamic_programming(env, horizon, rewards, proba):
@@ -104,3 +105,14 @@ def value_iteration(env, gamma, epsilon, rewards, proba, n_states):
     policy = np.argmax(Q,1);
     # Return the obtained policy
     return V, policy;
+
+
+
+
+
+
+
+
+
+
+
