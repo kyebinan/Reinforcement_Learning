@@ -209,8 +209,6 @@ class SimpleMaze(Maze):
                     num_states_to_position[s] = (i,j)
                     position_states_to_num[(i,j)] = s
                     s += 1
-        print(num_states_to_position)
-        print(position_states_to_num)
         return num_states_to_position, position_states_to_num
     
 
