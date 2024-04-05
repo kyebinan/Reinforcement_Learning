@@ -120,6 +120,29 @@ class Maze(ABC):
         actions[self.MOVE_UP]    = (-1,0);
         actions[self.MOVE_DOWN]  = (1,0);
         return actions;
+
+    def agent_move(self, init_pos, action):
+        """ Makes a step in the maze, given a current position and an action.
+            If the action STAY or an inadmissible action is used, the agent stays in place.
+
+            :return tuple next_cell: Position (x,y) on the maze that agent transitions to.
+        """
+        # Compute the future position given current (state, action)
+        y,x = init_pos
+        row = y + self.actions[action][0];
+        col = x + self.actions[action][1];
+        # Is the future position an impossible one ?
+        hitting_maze_walls =  (row == -1) or (row == self.maze.shape[0]) or \
+                              (col == -1) or (col == self.maze.shape[1]) or \
+                              (self.maze[row,col] == 1);
+        # Based on the impossiblity check return the next state.
+        if hitting_maze_walls:
+            return init_pos
+        else:
+            return (row, col)
+        
+    def minotaur_move(self, init_pos):
+        pass
     
     @abstractmethod
     def dict_states(self):
@@ -130,15 +153,9 @@ class Maze(ABC):
         pass
 
     @abstractmethod
-    def agent_move(self, init_pos, action):
-        pass
-    
-    @abstractmethod
     def compute_rewards(self):
         pass
     
-    def minotaur_move(self, init_pos):
-        pass
 
 
 
@@ -214,28 +231,6 @@ class SimpleMaze(Maze):
                 next_s = self.position_states_to_num[next_pos]
                 transition_probabilities[next_s, s, a] = 1.
         return transition_probabilities;
-
-
-
-    def agent_move(self, init_pos, action):
-        """ Makes a step in the maze, given a current position and an action.
-            If the action STAY or an inadmissible action is used, the agent stays in place.
-
-            :return tuple next_cell: Position (x,y) on the maze that agent transitions to.
-        """
-        # Compute the future position given current (state, action)
-        y,x = init_pos
-        row = y + self.actions[action][0];
-        col = x + self.actions[action][1];
-        # Is the future position an impossible one ?
-        hitting_maze_walls =  (row == -1) or (row == self.maze.shape[0]) or \
-                              (col == -1) or (col == self.maze.shape[1]) or \
-                              (self.maze[row,col] == 1);
-        # Based on the impossiblity check return the next state.
-        if hitting_maze_walls:
-            return init_pos
-        else:
-            return (row, col)
 
 
     def compute_rewards(self):
