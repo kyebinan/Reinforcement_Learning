@@ -1,5 +1,6 @@
 import numpy as np
 import random
+from abc import ABC, abstractmethod
 
 
 def dynamic_programming(env, horizon, rewards, proba):
@@ -108,7 +109,156 @@ def value_iteration(env, gamma, epsilon, rewards, proba, n_states):
 
 
 
-class Maze:
+class Maze(ABC):
+    
+    def dict_actions(self):
+        """Compute the delta for each action and save these in a dictionnary"""
+        actions = dict();
+        actions[self.STAY]       = (0, 0);
+        actions[self.MOVE_LEFT]  = (0,-1);
+        actions[self.MOVE_RIGHT] = (0, 1);
+        actions[self.MOVE_UP]    = (-1,0);
+        actions[self.MOVE_DOWN]  = (1,0);
+        return actions;
+    
+    @abstractmethod
+    def dict_states(self):
+        pass
+
+    @abstractmethod
+    def compute_transitions(self):
+        pass
+
+    @abstractmethod
+    def agent_move(self, init_pos, action):
+        pass
+    
+    @abstractmethod
+    def compute_rewards(self):
+        pass
+    
+    def minotaur_move(self, init_pos):
+        pass
+
+
+
+class SimpleMaze(Maze):
+
+    # Actions
+    STAY       = 0
+    MOVE_LEFT  = 1
+    MOVE_RIGHT = 2
+    MOVE_UP    = 3
+    MOVE_DOWN  = 4
+
+    # Give names to actions
+    actions_names = {
+        STAY: "stay",
+        MOVE_LEFT: "move left",
+        MOVE_RIGHT: "move right",
+        MOVE_UP: "move up",
+        MOVE_DOWN: "move down"
+    }
+
+    # Reward values
+    STEP_REWARD = -1
+    GOAL_REWARD = 10
+    IMPOSSIBLE_REWARD = -10
+    
+
+    def __init__(self, maze, weights=None, random_rewards=False):
+        """ Constructor of the environment Maze."""
+        self.maze                     = maze
+        self.actions                  = self.dict_actions()
+        self.n_actions                = len(self.actions)
+        self.num_states_to_position, self.position_states_to_num   = self.dict_states()
+        self.n_states                 = len(self.num_states_to_position)
+        self.transition_probabilities = self.compute_transitions()
+        self.rewards                  = self.compute_rewards()
+    
+
+    def dict_states(self):
+        """Compute two dictionnairies
+        states : which allow to map a state s with an index (y,x)
+        map    : which allow to map an index (y, x) with a state s"""
+
+        num_states_to_position = dict()
+        position_states_to_num = dict()
+        s = 0
+
+        for i in range(self.maze.shape[0]):
+            for j in range(self.maze.shape[1]):
+                if self.maze[i,j] != 1:
+                    num_states_to_position[s] = (i,j)
+                    position_states_to_num[(i,j)] = s
+                    s += 1
+        print(num_states_to_position)
+        print(position_states_to_num)
+        return num_states_to_position, position_states_to_num
+    
+
+    def compute_transitions(self):
+        """ Computes the transition probabilities for every state action pair.
+        :return numpy.tensor transition probabilities: tensor of transition
+        probabilities of dimension S*S*A
+        """
+        # Initialize the transition probailities tensor (S,S,A)
+        dimensions = (self.n_states,self.n_states,self.n_actions);
+        transition_probabilities = np.zeros(dimensions);
+
+        # Compute the transition probabilities. 
+        # Note that the transitions are deterministic.
+        for s in self.num_states_to_position.keys():
+            for a in range(self.n_actions):
+                next_pos = self.agent_move(self.num_states_to_position[s], a)
+                next_s = self.position_states_to_num[next_pos]
+                transition_probabilities[next_s, s, a] = 1.
+        return transition_probabilities;
+
+
+
+    def agent_move(self, init_pos, action):
+        """ Makes a step in the maze, given a current position and an action.
+            If the action STAY or an inadmissible action is used, the agent stays in place.
+
+            :return tuple next_cell: Position (x,y) on the maze that agent transitions to.
+        """
+        # Compute the future position given current (state, action)
+        y,x = init_pos
+        row = y + self.actions[action][0];
+        col = x + self.actions[action][1];
+        # Is the future position an impossible one ?
+        hitting_maze_walls =  (row == -1) or (row == self.maze.shape[0]) or \
+                              (col == -1) or (col == self.maze.shape[1]) or \
+                              (self.maze[row,col] == 1);
+        # Based on the impossiblity check return the next state.
+        if hitting_maze_walls:
+            return init_pos
+        else:
+            return (row, col)
+
+
+    def compute_rewards(self):
+        rewards = np.zeros((self.n_states, self.n_actions));
+        # If the rewards are not described by a weight matrix
+        for s in self.num_states_to_position.keys():
+            for a in range(self.n_actions):
+                init_pos = self.num_states_to_position[s][0]
+                next_pos = self.agent_move(init_pos, a)
+                pos = next_pos
+                next_s = self.position_states_to_num[pos]
+                if next_pos == init_pos and a != self.STAY:
+                    rewards[s,a] = self.IMPOSSIBLE_REWARD
+                    # Reward for reaching the exit
+                elif self.maze[self.num_states_to_position[next_s][0]] == 2:
+                    rewards[s,a] = self.GOAL_REWARD;
+                    # Reward for taking a step to an empty cell that is not the exit
+                else:
+                    rewards[s,a] = self.STEP_REWARD 
+        return rewards;
+
+
+class MinotaurMaze(Maze):
 
     # Actions
     STAY       = 0
@@ -145,13 +295,6 @@ class Maze:
         self.n_states                 = len(self.num_states_to_position)
         self.transition_probabilities = self.compute_transitions()
         self.rewards                  = self.compute_rewards()
-
-        # self.new_num_states_to_position   = self.new_dict_states()[0]
-        # self.new_position_states_to_num   = self.new_dict_states()[1]
-        # self.new_n_states                 = len(self.new_num_states_to_position)
-        # self.transition_new_probabilities = self.compute_new_transitions()
-        # self.new_rewards                  = self.compute_new_rewards()
-
 
     def trade_off_minotaur_move(self, list_move, pos_agent):
         if random.random() < 0.35 :
@@ -315,10 +458,5 @@ class Maze:
                 else:
                     rewards[s,a] = self.STEP_REWARD 
         return rewards;
-
-
-
-
-
 
 
