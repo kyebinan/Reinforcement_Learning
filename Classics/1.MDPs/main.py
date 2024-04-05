@@ -5,7 +5,7 @@ from abc import ABC, abstractmethod
 class Algorithm:
 
     @staticmethod
-    def dynamic_programming(env, horizon, rewards, proba):
+    def dynamic_programming(env, horizon):
         """ Solves the shortest path problem using dynamic programming
             :input Maze env           : The maze environment in which we seek to
                                         find the shortest path.
@@ -22,8 +22,8 @@ class Algorithm:
         # - State space
         # - Action space
         # - The finite horizon
-        p         = proba
-        r         = rewards
+        p         = env.transition_probabilities
+        r         = env.rewards
         n_states  = env.n_states;
         n_actions = env.n_actions;
         T         = horizon;
@@ -267,9 +267,10 @@ class SimpleMaze(Maze):
             # Move to next state given the policy and the current state
             init_pos = self.num_states_to_position[s]
             next_pos = self.agent_move(init_pos, policy[s,t])
-            path.append(next_pos)
-            t +=1
             s = self.position_states_to_num[next_pos]
+            path.append(s)
+            t +=1
+            
 
             if next_pos == (6,5) :
                 victory = True
