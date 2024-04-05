@@ -243,14 +243,13 @@ class SimpleMaze(Maze):
         # If the rewards are not described by a weight matrix
         for s in self.num_states_to_position.keys():
             for a in range(self.n_actions):
-                init_pos = self.num_states_to_position[s][0]
-                next_pos = self.agent_move(init_pos, a)
+                next_pos = self.agent_move(self.num_states_to_position[s], a)
                 pos = next_pos
                 next_s = self.position_states_to_num[pos]
-                if next_pos == init_pos and a != self.STAY:
+                if next_pos == self.num_states_to_position[s] and a != self.STAY:
                     rewards[s,a] = self.IMPOSSIBLE_REWARD
                     # Reward for reaching the exit
-                elif self.maze[self.num_states_to_position[next_s][0]] == 2:
+                elif self.maze[self.num_states_to_position[next_s]] == 2:
                     rewards[s,a] = self.GOAL_REWARD;
                     # Reward for taking a step to an empty cell that is not the exit
                 else:
