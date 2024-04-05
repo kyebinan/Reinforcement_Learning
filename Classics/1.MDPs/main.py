@@ -195,6 +195,7 @@ class SimpleMaze(Maze):
         self.n_states                 = len(self.num_states_to_position)
         self.transition_probabilities = self.compute_transitions()
         self.rewards                  = self.compute_rewards()
+        self.exit = (6,5)
     
 
     def dict_states(self):
@@ -212,6 +213,9 @@ class SimpleMaze(Maze):
                     num_states_to_position[s] = (i,j)
                     position_states_to_num[(i,j)] = s
                     s += 1
+                if self.maze[i,j] == 2 :
+                    self.exit = (i,j)
+
         return num_states_to_position, position_states_to_num
     
 
@@ -251,6 +255,27 @@ class SimpleMaze(Maze):
                 else:
                     rewards[s,a] = self.STEP_REWARD 
         return rewards;
+
+    def simulateDynProg(self, start_agent, V, policy):
+        victory =  False
+        path = []
+        horizon = policy.shape[1]
+        t = 0; 
+        s =  self.position_states_to_num[start_agent]
+        path.append(s)
+        while t < horizon-1:
+            # Move to next state given the policy and the current state
+            init_pos = self.num_states_to_position[s]
+            next_pos = self.agent_move(init_pos, policy[s,t])
+            path.append(next_pos)
+            t +=1
+            s = self.position_states_to_num[next_pos]
+
+            if next_pos == (6,5) :
+                victory = True
+                return path, victory, policy
+
+        return path, victory, policy
 
 
 class MinotaurMaze(Maze):
