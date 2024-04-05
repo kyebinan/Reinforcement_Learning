@@ -228,7 +228,7 @@ def animate_solution(env, path, policy):
 		for ii in range(maze.shape[0]):
 			for jj in range(maze.shape[1]):
 				if maze[(ii,jj)] != 1:
-					s = env.position_states_to_num[pos]
+					s = env.position_states_to_num[(ii,jj)]
 					grid.get_celld()[(ii,jj)].get_text().set_text(actions_names[policy[s,i]])
 
 		grid.get_celld()[pos].set_facecolor(BRIGHT_ORANGE)
