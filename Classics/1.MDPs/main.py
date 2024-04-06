@@ -54,7 +54,7 @@ class Algorithm:
 
 
     @staticmethod
-    def value_iteration(env, gamma, epsilon, rewards, proba, n_states):
+    def value_iteration(env, gamma, epsilon):
         """ Solves the shortest path problem using value iteration
             :input Maze env           : The maze environment in which we seek to
                                         find the shortest path.
@@ -71,9 +71,9 @@ class Algorithm:
         # - State space
         # - Action space
         # - The finite horizon
-        p         = proba
-        r         = rewards
-        #n_states  = n_states;
+        p         = env.transition_probabilities
+        r         = env.rewards
+        n_states  = env.n_states;
         n_actions = env.n_actions;
 
         # Required variables and temporary ones for the VI to run
@@ -256,6 +256,7 @@ class SimpleMaze(Maze):
                     rewards[s,a] = self.STEP_REWARD 
         return rewards;
 
+
     def simulateDynProg(self, start_agent, V, policy):
         victory =  False
         path = []
@@ -271,8 +272,7 @@ class SimpleMaze(Maze):
             path.append(s)
             t +=1
             
-
-            if next_pos == (6,5) :
+            if next_pos == self.exit :
                 victory = True
                 return path, victory, policy
 
@@ -311,14 +311,15 @@ class MinotaurMaze(Maze):
         self.maze                     = maze
         self.actions                  = self.dict_actions()
         self.n_actions                = len(self.actions)
-        self.num_states_to_position   = self.dict_states()[0]
-        self.position_states_to_num   = self.dict_states()[1]
+        self.num_states_to_position, self.position_states_to_num   = self.dict_states()
         self.n_states                 = len(self.num_states_to_position)
         self.transition_probabilities = self.compute_transitions()
         self.rewards                  = self.compute_rewards()
+        self.exit = (6,5)
+
 
     def trade_off_minotaur_move(self, list_move, pos_agent):
-        if random.random() < 0.35 :
+        if random.random() < 0.5 :
             min_dist = abs(pos_agent[1]-list_move[0][1]) + abs(pos_agent[0]-list_move[0][0])
             dist, i = 0, 0
             for pos in list_move[1:]:
@@ -342,6 +343,7 @@ class MinotaurMaze(Maze):
         actions[self.MOVE_DOWN]  = (1,0);
         return actions;
 
+
     def dict_states(self):
         """Compute two dictionnairies
         states : which allow to map a state s with an index (y,x)
@@ -350,7 +352,6 @@ class MinotaurMaze(Maze):
         num_states_to_position = dict()
         position_states_to_num = dict()
         s = 0
-
         for i in range(self.maze.shape[0]):
             for j in range(self.maze.shape[1]):
                 if self.maze[i,j] != 1:
@@ -387,7 +388,6 @@ class MinotaurMaze(Maze):
                     transition_probabilities[next_s, s, a] = 1/n
 
         return transition_probabilities;
-
 
 
     def agent_move(self, init_pos, action):
@@ -443,8 +443,6 @@ class MinotaurMaze(Maze):
             action = random.choice(possible_moves)
 
         # Compute the future position given current (state, action)
-        #row = y + self.actions[action][0];
-        #col = x + self.actions[action][1];
         new_positions = []
         for act in possible_moves:
             row = y + self.actions[act][0];
@@ -479,5 +477,46 @@ class MinotaurMaze(Maze):
                 else:
                     rewards[s,a] = self.STEP_REWARD 
         return rewards;
+
+
+    def simulateValIter(self, start_agent, start_minotaur, V, policy):
+        victory = False
+        path = []
+        # We compute the transition probabilities
+        s =  self.position_states_to_num[(start_agent, start_minotaur)]
+        path.append(s)
+        # Initialize current state, next state and time
+        t = 1;
+        init_pos = self.num_states_to_position[s][0]
+        int_pos_min = self.num_states_to_position[s][1]
+        next_pos = self.agent_move(init_pos, policy[s])
+        next_pos_min_list = self.minotaur_move(int_pos_min)
+        n = len(next_pos_min_list) - 1
+        next_pos_min = next_pos_min_list[random.randint(0, n)]
+        next_s = self.position_states_to_num[(next_pos, next_pos_min)]
+        # Loop while state is not the goal state
+        while True: 
+            # Update state
+            s = next_s;
+            # Move to next state given the policy and the current state
+            next_pos = self.agent_move(next_pos, policy[s]);
+            next_pos_min_list = self.minotaur_move(next_pos_min)
+            n = len(next_pos_min_list) - 1
+            next_pos_min = next_pos_min_list[random.randint(0, n)]
+            # Add the position in the maze corresponding to the next state to the path
+            next_s = self.position_states_to_num[(next_pos, next_pos_min)]
+            path.append(s)
+            # Update time and state for next iteration
+            t +=1;
+
+            if next_pos == next_pos_min :
+                victory = False
+                return path, victory, policy
+
+            if next_pos == self.exit :
+                victory = True
+                return path, victory, policy
+        
+
 
 
