@@ -467,7 +467,7 @@ class MinotaurMaze(Maze):
         next_pos = self.agent_move(init_pos, policy[s])
         next_pos_min_list = self.minotaur_move(int_pos_min)
         n = len(next_pos_min_list) - 1
-        next_pos_min = self.trade_off_minotaur_move(self, next_pos_min_list, next_pos)
+        next_pos_min = self.trade_off_minotaur_move(next_pos_min_list, next_pos)
         next_s = self.position_states_to_num[(next_pos, next_pos_min)]
         # Loop while state is not the goal state
         while True: 
@@ -477,7 +477,7 @@ class MinotaurMaze(Maze):
             next_pos = self.agent_move(next_pos, policy[s]);
             next_pos_min_list = self.minotaur_move(next_pos_min)
             n = len(next_pos_min_list) - 1
-            next_pos_min = next_pos_min = self.trade_off_minotaur_move(self, next_pos_min_list, next_pos)
+            next_pos_min = next_pos_min = self.trade_off_minotaur_move(next_pos_min_list, next_pos)
             # Add the position in the maze corresponding to the next state to the path
             next_s = self.position_states_to_num[(next_pos, next_pos_min)]
             path.append(s)
