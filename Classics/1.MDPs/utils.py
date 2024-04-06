@@ -208,11 +208,11 @@ def animate_solutionVI(env, path, policy):
 
 	# Update the color at each frame
 	for i in range(len(path)):
-		_, pos = env.num_states_to_position[path[i]]
+		# _, pos = env.num_states_to_position[path[i]]
 		for ii in range(maze.shape[0]):
 			for jj in range(maze.shape[1]):
 				if maze[(ii,jj)] != 1:
-					s = env.position_states_to_num[((ii,jj), pos)]
+					s = env.position_states_to_num[((ii,jj), path_minotaur[i])]
 					grid.get_celld()[(ii,jj)].get_text().set_text(actions_names[policy[s]])
 
 		grid.get_celld()[(path_agent[i])].set_facecolor(BRIGHT_ORANGE)
